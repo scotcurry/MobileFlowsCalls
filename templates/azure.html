@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Microsoft Identity Python Web App</h2>
+    <h3 class="text-center">Access Token: {{ access_token }}</h3>
+</div>
+<div class="container">
+    <table class="table">
+        <thead class="thread-dark">
+            <tr>
+                <th scope="col">Display Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Title</th>
+                <th scope="col">Phone</th>
+            </tr>
+        </thead>
+    <tbody>
+        {% for current_user in all_users %}
+            <tr>
+                <td scope="row">{{ current_user.display_name }}</td>
+                <td scope="row">{{ current_user.email }}</td>
+                <td scope="row">{{ current_user.title }}</td>
+                <td scope="row">{{ current_user.phone }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<footer>
+<p style="text-align: right">Powered by MSAL Python {{ msal_version }}</p>
+<a class="float-right" href="https://github.com/AzureAD/microsoft-authentication-library-for-python/blob/dev/sample/confidential_client_secret_sample.py">Sample Code</a>
+</footer>
+{% endblock %}

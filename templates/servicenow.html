@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<form action="" method="post">
+    <div class="form-group">
+        <label for="sn_url">ServiceNow URL</label>
+        <input type="text" class="form-control" name="sn_url" id="sn_url" placeholder="{{ sn_url }}" value="{{ sn_url }}">
+    </div>
+    <div class="form-group">
+        <label for="sn_client_id">ServiceNow Client ID</label>
+        <input type="text" class="form-control" id="sn_client_id" placeholder="{{ sn_client_id }}" name="sn_client_id"
+            value="{{ sn_client_id }}">
+        <small id="sn_client_id_help" class="form-text text-muted">These values are created and maintained in the Application Registry Section</small>
+    </div>
+    <div class="form-group">
+        <label for="sn_client_secret">ServiceNow Client Secret</label>
+        <input type="password" class="form-control" id="sn_client_secret" name="sn_client_secret" placeholder="{{ sn_client_secret }}"
+            name="sn_client_secret" value="{{ sn_client_secret }}">
+        <small id="sn_client_secret_help" class="form-text text-muted">These values are created and maintained in the Application Registry Section</small>
+    </div>
+    <div class="form-group">
+        <label for="sn_api_user">Service Now API Username</label>
+        <input type="text" class="form-control" id="sn_api_user" name="sn_api_user_name" placeholder="{{ sn_api_user }}"
+            value="{{ sn_api_user }}">
+        <small id="sn_user_name_help" class="form-test text-muted">This has only been tested when the user has the Admin role</small>
+    </div>
+    <div class="form-group">
+        <label for="sn_api_user_password">Service Now API Password</label>
+        <input type="password" class="form-control" id="sn_api_user_password" name="sn_api_user_password" placeholder="{{ sn_api_user_password }}"
+            value="{{ sn_api_user_password }}">
+    </div>
+    <button type="submit" class="btn btn-primary">Validate</button>
+    <hr>
+    </div>
+</form>
+
+{% if user_name %}
+<div class="container">
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">User Name</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">{{ user_sn_name }}</th>
+                <td>{{ user_name }}</td>
+                <td>{{ user_email }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
