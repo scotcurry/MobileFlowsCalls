@@ -1,7 +1,8 @@
-from flask import Flask, request, redirect, session, url_for, render_template, flash
+from flask import Flask, request, redirect, session, url_for, render_template, flash, abort
 from werkzeug.utils import secure_filename
 from ibm_watson import AssistantV2, ApiException
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from datetime import datetime
 import logging
 import json
 import yaml
@@ -20,34 +21,14 @@ logFormatter = '%(asctime)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=logFormatter, level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
-clientid = 'e43fea916ec80c8a978a'
-# client_secret = '250fae13610c1a0a03b7fb79dfd2aa21b2e9b60a'
-authorization_base_url = 'https://github.com/login/oauth/authorize'
-token_url = 'https://github.com/login/oauth/access_token'
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'csv'}
-
-snserver_name = 'https://dev90402.service-now.com/'
-snoauth_clientid = '1fec618767885050e9e9a7779df2371d'
-snoauth_base_url = 'https://dev90402.service-now.com/oauth_token.do'
-snoath_token_url = 'https://dev90402.service-now.com/oauth_token.do'
 
 try:
     with open('settings.yaml', 'r') as settings_file:
         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
 except IOError:
     print('Got an IO Error')
-
-# try:
-#     with open('azure_settings.json', 'r') as azure_settings:
-#         config = json.load(azure_settings)
-# except IOError:
-#     print('Got an Azure IO Error')
-#
-# azure_client_id = settings['azure_client_id']
-# authority = None
-# azure_client_secret = settings['azure_client_secret']
-# azure_scope = settings['azure_scope']
 
 
 @app.route('/')
@@ -108,7 +89,6 @@ def about():
 @app.route('/uploadcsv', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        print('Got the Post')
         if 'file' not in request.files:
             print('Got no file')
             flash('No File Part')
@@ -160,6 +140,29 @@ def azure_functions():
     token_to_print = token[0:10] + '...'
     all_users = azure_get_user_info(token)
     return render_template('azure.html', msal_version=msal_version, access_token=token_to_print, all_users=all_users)
+
+
+@app.route('/getipaddress', methods=['POST'])
+def get_ad_ip_address():
+    if not request.json:
+        abort(400)
+    now = datetime.now()
+    json_time = now.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        file_to_save = {
+            'update_time': json_time,
+            'ip_address': request.json['ip_address']
+        }
+        file_name = 'ip_address.json'
+        path = os.path.join(UPLOAD_FOLDER, file_name)
+        print(path)
+        print(file_to_save)
+        with open(path, 'w') as output:
+            output.write(json.dumps(file_to_save))
+    except IOError as e:
+        print(e)
+        return 'Did Not Save'
+    return file_to_save
 
 
 def allowed_file(filename):

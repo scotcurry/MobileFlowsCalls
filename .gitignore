@@ -81,3 +81,4 @@ fabric.properties
 .history/
 /.vscode/settings.json
 /.deployment
+/uploads
