@@ -6,6 +6,7 @@ import msal
 import json
 import requests
 
+from urllib.parse import urljoin, urlencode
 from models.azure_user import Azure_User
 
 logFormatter = '%(asctime)s - %(levelname)s - %(message)s'
@@ -46,7 +47,7 @@ def azure_get_token():
 
 def azure_get_user_info(access_token):
     headers = {'Authorization': 'Bearer ' + access_token}
-    user_data = requests.get(config['user_endpoint'], headers=headers)
+    user_data = requests.get(build_url(config['user_endpoint']), headers=headers)
     user_json = user_data.json()
     print(user_json)
     all_users = user_json['value']
@@ -56,5 +57,15 @@ def azure_get_user_info(access_token):
         user_to_add = Azure_User(current_user['displayName'], current_user['mail'], current_user['jobTitle'],
                                  current_user['mobilePhone'])
         all_user_list.append(user_to_add)
-
     return all_user_list
+
+
+def get_subscription_info(access_token):
+    headers = {'Authorization': 'Bearer ' + access_token}
+    subscription_info = requests.get(build_url(config['subscription_endpoint']), headers)
+    print(subscription_info)
+
+
+def build_url(end_point):
+    base_url = config['graph_base']
+    return urljoin(base_url, end_point)

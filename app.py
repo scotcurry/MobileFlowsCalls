@@ -11,7 +11,7 @@ import msal
 
 # from sn_auth_helper import get_auth_token
 from sn_api_calls import get_single_user, get_auth_token
-from azure_api_calls import azure_get_token, azure_get_user_info
+from azure_api_calls import azure_get_token, azure_get_user_info, get_subscription_info
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -35,7 +35,13 @@ except IOError:
 @app.route('/index')
 def hello_world():
     redirect_url = request.host + '/servicenow'
-    return render_template('index.html', server_url=redirect_url)
+    files = os.listdir(UPLOAD_FOLDER)
+    file_names = []
+    for current_file in files:
+        file_names.append(current_file)
+    total_files_in_uploads = len(file_names)
+    return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
+                           all_files=file_names)
 
 
 # See https://requests-oauthlib.readthedocs.io/en/latest/examples/real_world_example.html for this complete example
@@ -139,6 +145,7 @@ def azure_functions():
     print(token)
     token_to_print = token[0:10] + '...'
     all_users = azure_get_user_info(token)
+    subscription_info = get_subscription_info(token)
     return render_template('azure.html', msal_version=msal_version, access_token=token_to_print, all_users=all_users)
 
 
