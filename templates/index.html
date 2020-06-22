@@ -1,24 +1,28 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container">
-    <p class="text-center">Utilities for Test Mobile Flows Calls</p>
-    <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
-    <table class="table">
-        <thead class="thread-dark">
-            <tr>
-                <th scope="col">Box</th>
-                <th scope="col">File Name</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for current_file in all_files %}
-            <tr>
-                <td><input type="checkbox"/></td>
-                <td scope="row">A</td>
-                <td scope="row">{{ current_file }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+<form action="" method="post">
+    <div class="container">
+        <p class="text-center">Utilities for Test Mobile Flows Calls</p>
+        <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
+        <table class="table">
+            <thead class="thread-dark">
+                <tr>
+                    <th scope="col">Box</th>
+                    <th scope="col">File Name</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for current_file in all_files %}
+                <tr>
+                    <td><input name='file' type="checkbox"/></td>
+                    <td scope="row">A</td>
+                    <td scope="row">{{ current_file }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" id="submit_button_process" value="Process" class="btn btn-primary">Process</button>
+        <button type="submit" id="submit_button" value="delete" class="btn btn-danger">Delete</button>
+    </div>
+</form>
 {% endblock %}

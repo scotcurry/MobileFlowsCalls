@@ -31,17 +31,26 @@ except IOError:
     print('Got an IO Error')
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 def hello_world():
     redirect_url = request.host + '/servicenow'
     files = os.listdir(UPLOAD_FOLDER)
     file_names = []
+    total_files_in_uploads = 0
+
     for current_file in files:
         file_names.append(current_file)
-    total_files_in_uploads = len(file_names)
-    return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
-                           all_files=file_names)
+        total_files_in_uploads = len(file_names)
+    if request.method == 'GET':
+        return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
+                               all_files=file_names)
+    else:
+        button_pushed = request.form['submit_button_process']
+        selected_files = request.form.getlist('file')
+        print('Total files: ' + str(len(selected_files)))
+        return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
+                               all_files=file_names)
 
 
 # See https://requests-oauthlib.readthedocs.io/en/latest/examples/real_world_example.html for this complete example
