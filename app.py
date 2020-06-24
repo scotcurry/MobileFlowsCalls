@@ -10,7 +10,7 @@ import os
 import msal
 
 # from sn_auth_helper import get_auth_token
-from sn_api_calls import get_single_user, get_auth_token
+from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info, get_subscription_info
 
 app = Flask(__name__)
@@ -33,12 +33,11 @@ except IOError:
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
-def hello_world():
+def index_page():
     redirect_url = request.host + '/servicenow'
     files = os.listdir(UPLOAD_FOLDER)
     file_names = []
     total_files_in_uploads = 0
-
     for current_file in files:
         file_names.append(current_file)
         total_files_in_uploads = len(file_names)
@@ -46,9 +45,11 @@ def hello_world():
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
                                all_files=file_names)
     else:
-        button_pushed = request.form['submit_button_process']
-        selected_files = request.form.getlist('file')
-        print('Total files: ' + str(len(selected_files)))
+        if 'Process' in request.form['submit']:
+            csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
+            add_users(csv_file)
+        if 'Delete' in request.form['submit']:
+            print('Delete')
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
                                all_files=file_names)
 
@@ -58,11 +59,12 @@ def hello_world():
 def service_now():
     # Let's pass the values from a form
     if request.method == 'GET':
-        sn_url = settings['sn_server_url']
-        sn_api_user = settings['sn_user_name']
-        sn_api_user_password = settings['sn_user_password']
-        sn_client_id = settings['sn_client_id']
-        sn_client_secret = settings['sn_client_secret']
+        sn_url = settings['cw_sn_server_url']
+        sn_api_user = settings['cw_sn_user_name']
+        sn_api_user_password = settings['cw_sn_user_password']
+        sn_client_id = settings['cw_sn_client_id']
+        sn_client_secret = settings['cw_sn_client_secret']
+        print()
         return render_template('servicenow.html', sn_client_id=sn_client_id,
                                sn_client_secret=sn_client_secret, sn_api_user_password=sn_api_user_password,
                                sn_api_user=sn_api_user, sn_url=sn_url)
@@ -75,10 +77,9 @@ def service_now():
         auth_token = get_auth_token(url, client_id, client_secret, user_name, user_password)
         user_json = get_single_user(url, auth_token, 'scurry')
         print(user_json)
-        user_sn_name = user_json['result'][0]['user_name']
         user_name = user_json['result'][0]['name']
-        user_email = user_json['result'][0]['email']
-        return render_template('servicenow.html', user_sn_name=user_sn_name, user_name=user_name, user_email=user_email)
+        user_email = 'place_holder'
+        return render_template('servicenow.html', user_sn_name=user_name, user_name=user_name, user_email=user_email)
 
 
 @app.route('/appapproval', methods=['GET', 'POST'])
@@ -103,24 +104,29 @@ def about():
 
 @app.route('/uploadcsv', methods=['GET', 'POST'])
 def upload_file():
+    is_valid = False
     if request.method == 'POST':
         if 'file' not in request.files:
             print('Got no file')
             flash('No File Part')
             return redirect(request.url)
         file = request.files['file']
-        print(file.filename)
         if file.filename == '':
             print('filename is blank')
             flash('No Selected File')
             return redirect(request.url)
-        if file and allowed_file(file.filename):
+        if file.filename == 'users.csv':
             filename = secure_filename(file.filename)
             file.save(os.path.join(UPLOAD_FOLDER, filename))
             print(os.path.join(UPLOAD_FOLDER, filename))
-            print('file saved')
+            is_valid = True
+        else:
+            print('Bad filename')
+            is_valid = False
+    else:
+        is_valid = True
 
-    return render_template('upload.html')
+    return render_template('upload.html', is_valid=is_valid)
 
 
 @app.route('/watsoninfo', methods=['GET', 'POST'])

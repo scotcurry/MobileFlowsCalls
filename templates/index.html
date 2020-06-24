@@ -7,22 +7,21 @@
         <table class="table">
             <thead class="thread-dark">
                 <tr>
-                    <th scope="col">Box</th>
+                    <th scope="col">Select</th>
                     <th scope="col">File Name</th>
                 </tr>
             </thead>
             <tbody>
             {% for current_file in all_files %}
                 <tr>
-                    <td><input name='file' type="checkbox"/></td>
-                    <td scope="row">A</td>
+                    <td><input name='file' type="radio"/></td>
                     <td scope="row">{{ current_file }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        <button type="submit" id="submit_button_process" value="Process" class="btn btn-primary">Process</button>
-        <button type="submit" id="submit_button" value="delete" class="btn btn-danger">Delete</button>
+        <input type="submit" id="submit_button_process" name="submit" value="Process" class="btn btn-primary" />
+        <input type="submit" id="submit_button_delete" name="submit" value="Delete" class="btn btn-primary">
     </div>
 </form>
 {% endblock %}
