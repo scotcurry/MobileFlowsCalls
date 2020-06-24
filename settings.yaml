@@ -1,8 +1,8 @@
-sn_server_url: "https://dev90402.service-now.com/oauth_token.do"
-sn_client_id: "1fec618767885050e9e9a7779df2371d"
-sn_client_secret: "cs6Q2D7Rg2qF"
+sn_server_url: "https://dev98691.service-now.com/oauth_token.do"
+sn_client_id: "28ad046abee110104fc3f06696c208ce"
+sn_client_secret: "LkQ~flB;*J"
 sn_user_name: "apiuser"
-sn_user_password: "AirWatch1"
+sn_user_password: "AirWatch1!"
 azure_client_secret: "6.rky3UQ-ragOsQ[88DVAiomzMVwXB_="
 azure_client_id: "48243db8-9d75-4919-8d82-8cd11f2a391e"
 azure_directory_id: "e95d3fd6-5534-4b14-b92c-c2c99647db7d"
@@ -15,4 +15,4 @@ cw_sn_user_name: "apiuser"
 cw_sn_user_password: "AirWatch1!"
 cw_server_base_url: "https://dev73687.service-now.com"
 add_user_endpoint: "api/now/table/sys_user"
-sn_tenant_to_use: 'CW'
+sn_tenant_to_use: 'default'

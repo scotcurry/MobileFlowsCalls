@@ -37,19 +37,28 @@ def index_page():
     redirect_url = request.host + '/servicenow'
     files = os.listdir(UPLOAD_FOLDER)
     file_names = []
+    file_ids = []
     total_files_in_uploads = 0
+    file_counter = 0
     for current_file in files:
         file_names.append(current_file)
+        file_ids.append('file' + str(file_counter))
         total_files_in_uploads = len(file_names)
     if request.method == 'GET':
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
-                               all_files=file_names)
+                               all_files=file_names, all_file_ids=file_ids)
     else:
+        selected = request.form.get('file')
         if 'Process' in request.form['submit']:
-            csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
-            add_users(csv_file)
+            if selected is not None:
+                csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
+                add_users(csv_file)
         if 'Delete' in request.form['submit']:
-            print('Delete')
+            if selected is not None:
+                file_name_to_delete = file_names[int(selected)]
+                print(file_name_to_delete)
+                file_to_delete = os.path.join(UPLOAD_FOLDER, file_name_to_delete)
+                os.remove(file_to_delete)
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
                                all_files=file_names)
 

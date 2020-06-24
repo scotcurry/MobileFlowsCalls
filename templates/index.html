@@ -12,10 +12,10 @@
                 </tr>
             </thead>
             <tbody>
-            {% for current_file in all_files %}
+            {% for counter in range(0, number_of_files) %}
                 <tr>
-                    <td><input name='file' type="radio"/></td>
-                    <td scope="row">{{ current_file }}</td>
+                    <td><input type="radio" name="file" value="{{ counter}}" ></td>
+                    <td scope="row">{{ all_files[counter] }}</td>
                 </tr>
             {% endfor %}
             </tbody>
