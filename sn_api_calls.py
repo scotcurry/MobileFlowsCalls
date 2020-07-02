@@ -30,21 +30,28 @@ try:
         default_settings.user_name = settings['sn_user_name']
         default_settings.user_password = settings['sn_user_password']
 except IOError:
-    print('Got an IO Error')
+    logger.error('Got an IO Error reading Settings.yaml')
 
 
 def get_auth_token(url, client_id, client_secret, user_name, password):
+    logger.info('ServiceNow URL: ' + url)
+    logger.info('Client ID: ' + client_id)
+    logger.info('Username: ' + user_name)
     params = {'grant_type': 'password', 'client_id': client_id, 'client_secret': client_secret,
               'username': user_name, 'password': password}
     sn_token_response = requests.post(url=url, data=params)
-    print(sn_token_response.status_code)
+    logger.info('Auth Token POST Status Code: ' + str(sn_token_response.status_code))
     if sn_token_response.status_code != 200:
-        return 'Got an Error'
+        logger.error('Error getting SN Auth Token: ' + str(sn_token_response.status_code))
+        return 'Auth Token Error'
 
-    data = sn_token_response.json()
-    logger.error('SN_API_Calls Access Token: ' + data['access_token'])
-    session['access_token'] = data['access_token']
-    return data['access_token']
+    try:
+        data = sn_token_response.json()
+        logger.error('SN_API_Calls Access Token: ' + data['access_token'])
+        session['access_token'] = data['access_token']
+        return data['access_token']
+    except json.decoder.JSONDecodeError:
+        return 'JSONDecodeError'
 
 
 def get_single_user(url, access_token, user_id):
@@ -57,26 +64,37 @@ def get_single_user(url, access_token, user_id):
 
 
 def add_users(csv_file):
+    successful_adds = 0
     auth_token = get_auth_token_to_use()
-    with open(csv_file, newline='') as user_file:
-        user_reader = csv.reader(user_file, delimiter='\t')
-        counter = 0
-        for row in user_reader:
-            if counter > 0:
-                first_name = row[0].lower()
-                last_name = row[1].lower()
-                first_initial = first_name[0:1]
-                user_name = first_initial + last_name
-                email_address = user_name + '@vmwareex.com'
-                print(email_address)
-                create_sn_user(auth_token, first_name, last_name, email_address, user_name)
-            counter += 1
-            print(counter)
+    if auth_token == 'JSONDecodeError':
+        return 'Error getting Access Token.  Check if hibernating'
+    else:
+        delimiter = '\t'
+        with open(csv_file, 'r') as csv_sample_line:
+            first_line = csv_sample_line.readline()
+            if first_line.find(',') > -1:
+                delimiter = ','
 
-    return True
+        with open(csv_file, newline='') as user_file:
+            user_reader = csv.reader(user_file, delimiter=delimiter)
+            counter = 0
+            for row in user_reader:
+                if counter > 0:
+                    first_name = row[0].lower()
+                    last_name = row[1].lower()
+                    first_initial = first_name[0:1]
+                    user_name = first_initial + last_name
+                    email_address = user_name + '@vmwareex.com'
+                    logger.info('Adding User: ' + email_address)
+                    success = create_sn_user(auth_token, first_name, last_name, email_address, user_name)
+                    successful_adds = successful_adds + success
+                counter += 1
+
+    return 'Successful Adds' + str(successful_adds)
 
 
 def create_sn_user(auth_token, first_name, last_name, email_address, user_name):
+    success = 0
     endpoint = settings['add_user_endpoint']
     create_user_info = {'first_name': first_name, 'last_name': last_name, 'email': email_address,
                         'user_name': user_name}
@@ -88,16 +106,17 @@ def create_sn_user(auth_token, first_name, last_name, email_address, user_name):
     else:
         endpoint_url = urljoin(default_settings.base_url, endpoint
                                )
-    print('Endpoint URL: ' + endpoint_url)
-    print('Auth String: ' + auth_string)
-    print('User Info: ' + user_json)
+    logger.info('Endpoint URL: ' + endpoint_url)
+    logger.info('Auth String: ' + auth_string)
+    logger.info('User Info: ' + user_json)
     response = requests.post(endpoint_url, headers=headers, data=user_json)
     if response.status_code != 200:
-        print('Status:', response.status_code, 'Headers:', response.headers, 'Error Response:',response.json())
+        logger.error('Status:', response.status_code, 'Headers:', response.headers, 'Error Response:',response.json())
+        success = 1
     else:
-        print('Success')
+        logger.Info('Success Retrieving Auth Token')
 
-    return True
+    return success
 
 
 def get_auth_token_to_use():

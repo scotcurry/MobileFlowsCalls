@@ -40,19 +40,25 @@ def index_page():
     file_ids = []
     total_files_in_uploads = 0
     file_counter = 0
+    status_message = 'Unknown Status'
     for current_file in files:
         file_names.append(current_file)
         file_ids.append('file' + str(file_counter))
         total_files_in_uploads = len(file_names)
+        file_counter = total_files_in_uploads
+
+    logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
     if request.method == 'GET':
+        logger.info('Calling GET on index.html')
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
                                all_files=file_names, all_file_ids=file_ids)
     else:
+        logger.info('Calling POST on index.html')
         selected = request.form.get('file')
         if 'Process' in request.form['submit']:
             if selected is not None:
                 csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
-                add_users(csv_file)
+                status_message = add_users(csv_file)
         if 'Delete' in request.form['submit']:
             if selected is not None:
                 file_name_to_delete = file_names[int(selected)]
@@ -60,7 +66,7 @@ def index_page():
                 file_to_delete = os.path.join(UPLOAD_FOLDER, file_name_to_delete)
                 os.remove(file_to_delete)
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
-                               all_files=file_names)
+                               all_files=file_names, status_message=status_message)
 
 
 # See https://requests-oauthlib.readthedocs.io/en/latest/examples/real_world_example.html for this complete example
