@@ -12,6 +12,7 @@ import msal
 # from sn_auth_helper import get_auth_token
 from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info, get_subscription_info
+from uem_rest_api import get_uem_oauth_token, get_uem_users
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -67,6 +68,24 @@ def index_page():
                 os.remove(file_to_delete)
         return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
                                all_files=file_names, status_message=status_message)
+
+
+@app.route('/uem', methods=['GET', 'POST'])
+def uem_calls():
+    if request.method == "GET":
+        uem_oauth_url = settings['uem_oauth_endpoint']
+        uem_client_id = settings['uem_oauth_client_id']
+        uem_client_secret = settings['uem_oauth_client_secret']
+        return render_template('uem.html', uem_oauth_url=uem_oauth_url, uem_client_id=uem_client_id,
+                        uem_client_secret=uem_client_secret)
+    else:
+        uem_oauth_url = request.form['uem_oauth_url'].strip()
+        uem_client_id = request.form['uem_client_id'].strip()
+        uem_client_secret = settings['uem_oauth_client_secret']
+        oauth_token = get_uem_oauth_token(uem_oauth_url, uem_client_id, uem_client_secret)
+        uem_users = get_uem_users(oauth_token)
+        return render_template('uem.html', uem_oauth_url=uem_oauth_url, uem_client_id=uem_client_id,
+                               uem_client_secret=uem_client_secret, uem_users=uem_users)
 
 
 # See https://requests-oauthlib.readthedocs.io/en/latest/examples/real_world_example.html for this complete example

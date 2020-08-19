@@ -16,3 +16,7 @@ cw_sn_user_password: "AirWatch1!"
 cw_server_base_url: "https://dev73687.service-now.com"
 add_user_endpoint: "api/now/table/sys_user"
 sn_tenant_to_use: 'default'
+uem_server: 'https://cn1506.awmdm.com'
+uem_oauth_endpoint: 'https://na.uemauth.vmwservices.com/connect/token'
+uem_oauth_client_id: '0dbaf00d17954b9ea8fe670a9591b2e6'
+uem_oauth_client_secret: '60939825df7e4e15a7e8491b326e3abf'
