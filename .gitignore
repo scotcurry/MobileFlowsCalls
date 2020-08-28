@@ -85,3 +85,4 @@ fabric.properties
 /uploads
 *.pyc
 .DS_Store
+/euc-user-uploaddb-firebase-adminsdk-p8fms-4a8bf8dd0e.json

@@ -30,7 +30,7 @@ def get_uem_oauth_token(oauth_url, client_id, client_secret):
     params = {'grant_type': 'client_credentials', 'client_id': client_id, 'client_secret': client_secret}
     uem_token_response = requests.post(url=oauth_url, data=params)
     if uem_token_response.status_code != 200:
-        logger.error('Error getting SN Auth Token:')
+        logger.error('Error getting UEM Auth Token:')
         return 'Auth Token Error'
     else:
         response_data = uem_token_response.json()
