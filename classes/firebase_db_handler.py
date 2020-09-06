@@ -4,6 +4,8 @@ import firebase_admin
 from firebase_admin import credentials, App
 from firebase_admin import db
 
+from models.fb_company_information import FbUserInformation, FbCompanyInformation
+
 
 def get_auth_cert():
     database_url = 'https://euc-user-uploaddb.firebaseio.com'
@@ -23,14 +25,37 @@ def get_company_records():
     return company_count
 
 
-def add_company():
+def add_company(company_json):
     firebase_db_app = get_auth_cert()
     db_reference = db.reference('/', firebase_db_app)
+    db_reference.child('companies').push(company_json)
     return True
 
 
-def build_company_json(company_info):
-    company_dict = {'company_name': company_info.company_name, 'company_address': company_info.street_address,
-                    'company_city': company_info.company_city, 'company_state': company_info.company_state}
-    company_json = json.dumps(company_dict, cls=dict)
-    return company_json
+def retrieve_company_info():
+    firebase_db_app = get_auth_cert()
+    db_reference = db.reference('companies', firebase_db_app)
+    fb_companies = db_reference.order_by_key().get()
+    all_companies_json = []
+    for key, val in fb_companies.items():
+        all_companies_json.append(val)
+
+    company_info = []
+    for current_company in all_companies_json:
+        current_company_json = json.loads(current_company)
+        company_employees = []
+        for current_user in current_company_json['users']:
+            employee_first_name = current_user['first_name']
+            employee_last_name = current_user['last_name']
+            employee_department = current_user['department']
+            employee_title = current_user['title']
+            employee_manager = current_user['manager_last_name']
+            company_employees.append(FbUserInformation(employee_first_name, employee_last_name, employee_department,
+                                                       employee_title, employee_manager))
+        company_name = current_company_json['company_name']
+        street_address = current_company_json['street_address']
+        city = current_company_json['company_city']
+        state = current_company_json['company_state']
+
+        company_info.append(FbCompanyInformation(company_name, street_address, city, state, company_employees))
+    return company_info

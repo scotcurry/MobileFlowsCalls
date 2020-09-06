@@ -1,28 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
 <form action="" method="post">
-    <div class="container">
-        <p class="text-center">Utilities for Test Mobile Flows Calls</p>
-        <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
-        <table class="table">
-            <thead class="thread-dark">
-                <tr>
-                    <th scope="col">Select</th>
-                    <th scope="col">File Name</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for counter in range(0, number_of_files) %}
-                <tr>
-                    <td><input type="radio" name="file" value="{{ counter}}" ></td>
-                    <td scope="row">{{ all_files[counter] }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <input type="submit" id="submit_button_process" name="submit" value="Process" class="btn btn-primary" />
-        <input type="submit" id="submit_button_delete" name="submit" value="Delete" class="btn btn-primary">
-    </div>
+    <p class="text-center">Utilities for Test Mobile Flows Calls</p>
+    <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
+    <table class="table">
+        <thead class="thread-dark">
+            <tr>
+                <th scope="col">Select</th>
+                <th scope="col">File Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for counter in range(0, number_of_files) %}
+            <tr>
+                <td><input type="radio" name="file" value="{{ counter}}" ></td>
+                <td scope="row">{{ all_files[counter] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" id="submit_button_process" name="submit" value="Process" class="btn btn-primary" />
+    <input type="submit" id="submit_button_delete" name="submit" value="Delete" class="btn btn-primary">
     <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
 </form>
 {% endblock %}
