@@ -1,8 +1,7 @@
-from flask import Flask, request, redirect, session, url_for, render_template, flash, abort
+from flask import Flask, request, redirect, session, render_template, flash, abort
 from werkzeug.utils import secure_filename
-from ibm_watson import AssistantV2, ApiException
-from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from datetime import datetime
+from os import path
 import logging
 import json
 import yaml
@@ -13,7 +12,9 @@ import msal
 from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info, get_subscription_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
+from classes.firebase_db_handler import retrieve_company_info
 
+# TODO:  Check this is to see how add an edit link https://www.youtube.com/watch?v=Us9DuF4KWUE
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
 app.secret_key = os.urandom(24)
@@ -36,23 +37,30 @@ except IOError:
 @app.route('/index', methods=['GET', 'POST'])
 def index_page():
     redirect_url = request.host + '/servicenow'
-    files = os.listdir(UPLOAD_FOLDER)
+
+    total_files_in_uploads = 0
     file_names = []
     file_ids = []
-    total_files_in_uploads = 0
-    file_counter = 0
-    status_message = 'Unknown Status'
-    for current_file in files:
-        file_names.append(current_file)
-        file_ids.append('file' + str(file_counter))
-        total_files_in_uploads = len(file_names)
-        file_counter = total_files_in_uploads
+    if path.exists(UPLOAD_FOLDER):
+        files = os.listdir(UPLOAD_FOLDER)
+
+        total_files_in_uploads = 0
+        file_counter = 0
+        status_message = 'Unknown Status'
+        for current_file in files:
+            file_names.append(current_file)
+            file_ids.append('file' + str(file_counter))
+            total_files_in_uploads = len(file_names)
+            file_counter = total_files_in_uploads
+    else:
+        os.mkdir(UPLOAD_FOLDER)
 
     logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
+    print('Files in upload: ' + str(total_files_in_uploads))
     if request.method == 'GET':
         logger.info('Calling GET on index.html')
-        return render_template('index.html', server_url=redirect_url, number_of_files=total_files_in_uploads,
-                               all_files=file_names, all_file_ids=file_ids)
+        all_companies = retrieve_company_info()
+        return render_template('index.html', all_companies=all_companies)
     else:
         logger.info('Calling POST on index.html')
         selected = request.form.get('file')
@@ -163,28 +171,28 @@ def upload_file():
     return render_template('upload.html', is_valid=is_valid)
 
 
-@app.route('/watsoninfo', methods=['GET', 'POST'])
-def call_watson():
-    if request.method == 'GET':
-        assistant_id = 'c5964ff2-fd30-4a23-ae3f-f9a65931d54e'
-        ibm_url = 'https://api.us-south.assistant.watson.cloud.ibm.com'
-        api_key = 'G14zvFinyuIIUAC3m-z5H3vM_Khjo8wZ6EktagnTEN4n'
-        return render_template('watson.html', app_id=assistant_id, ibm_url=ibm_url, api_key=api_key)
-    else:
-        app_id = request.form['app_id'].strip()
-        url = request.form['watson_url'].strip()
-        api_key = request.form['api_key'].strip()
-        authenticator = IAMAuthenticator(api_key)
-        version = '2020-04-01'
-        assistant = AssistantV2(version=version, authenticator=authenticator)
-        assistant.set_service_url(url)
-        print('URL: ' + url)
-        print('Assistant ID: ' + app_id)
-        print('API Key: ' + api_key)
-        response = assistant.create_session(assistant_id=app_id).get_result()
-        print(json.dumps(response, indent=2))
-
-        return render_template('watson.html', session_id=response['session_id'])
+# @app.route('/watsoninfo', methods=['GET', 'POST'])
+# def call_watson():
+#     if request.method == 'GET':
+#         assistant_id = 'c5964ff2-fd30-4a23-ae3f-f9a65931d54e'
+#         ibm_url = 'https://api.us-south.assistant.watson.cloud.ibm.com'
+#         api_key = 'G14zvFinyuIIUAC3m-z5H3vM_Khjo8wZ6EktagnTEN4n'
+#         return render_template('watson.html', app_id=assistant_id, ibm_url=ibm_url, api_key=api_key)
+#     else:
+#         app_id = request.form['app_id'].strip()
+#         url = request.form['watson_url'].strip()
+#         api_key = request.form['api_key'].strip()
+#         authenticator = IAMAuthenticator(api_key)
+#         version = '2020-04-01'
+#         assistant = AssistantV2(version=version, authenticator=authenticator)
+#         assistant.set_service_url(url)
+#         print('URL: ' + url)
+#         print('Assistant ID: ' + app_id)
+#         print('API Key: ' + api_key)
+#         response = assistant.create_session(assistant_id=app_id).get_result()
+#         print(json.dumps(response, indent=2))
+#
+#         return render_template('watson.html', session_id=response['session_id'])
 
 
 @app.route('/azure', methods=['GET', 'POST'])

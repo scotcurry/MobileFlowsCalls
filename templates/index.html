@@ -3,6 +3,7 @@
 <form action="" method="post">
     <p class="text-center">Utilities for Test Mobile Flows Calls</p>
     <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
+    <!--
     <table class="table">
         <thead class="thread-dark">
             <tr>
@@ -10,11 +11,24 @@
                 <th scope="col">File Name</th>
             </tr>
         </thead>
-        <tbody>
-        {% for counter in range(0, number_of_files) %}
+    </table>
+    -->
+    <table class="table">
+        <thead class="thread-dark">
             <tr>
-                <td><input type="radio" name="file" value="{{ counter}}" ></td>
-                <td scope="row">{{ all_files[counter] }}</td>
+                <th scope="col">Company Name</th>
+                <th scope="col">Street Address</th>
+                <th scope="col">City</th>
+                <th scope="col">State</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for current_company in all_companies %}
+            <tr>
+                <td scope="row">{{ current_company.company_name }}</td>
+                <td scope="row">{{ current_company.street_address }}</td>
+                <td scope="row">{{ current_company.company_city }}</td>
+                <td scope="row">{{ current_company.company_state }}</td>
             </tr>
         {% endfor %}
         </tbody>

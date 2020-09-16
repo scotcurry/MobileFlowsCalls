@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from classes.firebase_db_handler import get_company_records, add_company, retrieve_company_info
+from classes.firebase_db_handler import get_company_records, add_company, retrieve_company_info, retrieve_company_by_id
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation
 
 
@@ -28,3 +28,9 @@ class TestFireBaseDBHandler(TestCase):
         for current_company in all_companies:
             print(current_company.company_name)
         self.assertGreater(len(all_companies), 0)
+
+    def test_retrieve_company_by_id(self):
+        child_index = '-MGJgRfcZE4T-3Ik5Pky'
+        retrieved_company = retrieve_company_by_id(child_index)
+        self.assertEqual(1, 1)
+

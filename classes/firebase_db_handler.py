@@ -38,6 +38,7 @@ def retrieve_company_info():
     fb_companies = db_reference.order_by_key().get()
     all_companies_json = []
     for key, val in fb_companies.items():
+        print(key)
         all_companies_json.append(val)
 
     company_info = []
@@ -59,3 +60,11 @@ def retrieve_company_info():
 
         company_info.append(FbCompanyInformation(company_name, street_address, city, state, company_employees))
     return company_info
+
+
+def retrieve_company_by_id(child_id):
+    firebase_db_app = get_auth_cert()
+    db_reference = db.reference('companies', firebase_db_app)
+    company_to_retrieve = db_reference.get()
+    print(company_to_retrieve)
+    return company_to_retrieve
