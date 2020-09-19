@@ -1,38 +1,32 @@
 {% extends "layout.html" %}
 {% block content %}
 <form action="" method="post">
-    <p class="text-center">Utilities for Test Mobile Flows Calls</p>
-    <p class="text-center">Total Files Uploaded: {{ number_of_files }}</p>
-    <!--
-    <table class="table">
-        <thead class="thread-dark">
-            <tr>
-                <th scope="col">Select</th>
-                <th scope="col">File Name</th>
-            </tr>
-        </thead>
-    </table>
-    -->
-    <table class="table">
-        <thead class="thread-dark">
-            <tr>
-                <th scope="col">Company Name</th>
-                <th scope="col">Street Address</th>
-                <th scope="col">City</th>
-                <th scope="col">State</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for current_company in all_companies %}
-            <tr>
-                <td scope="row">{{ current_company.company_name }}</td>
-                <td scope="row">{{ current_company.street_address }}</td>
-                <td scope="row">{{ current_company.company_city }}</td>
-                <td scope="row">{{ current_company.company_state }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <h2 class="text-center text-primary">Utilities for EBC Demos</h2>
+    {% if have_cert_path %}
+        <table class="table">
+            <thead class="thread-dark">
+                <tr>
+                    <th scope="col">Company Name</th>
+                    <th scope="col">Street Address</th>
+                    <th scope="col">City</th>
+                    <th scope="col">State</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for current_company in all_companies %}
+                <tr>
+                    <td scope="row">{{ current_company.company_name }}</td>
+                    <td scope="row">{{ current_company.street_address }}</td>
+                    <td scope="row">{{ current_company.company_city }}</td>
+                    <td scope="row">{{ current_company.company_state }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <h2 class="text-center text-danger">No Cert File</h2>
+    {% endif %}
+
     <input type="submit" id="submit_button_process" name="submit" value="Process" class="btn btn-primary" />
     <input type="submit" id="submit_button_delete" name="submit" value="Delete" class="btn btn-primary">
     <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
