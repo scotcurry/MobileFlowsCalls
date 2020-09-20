@@ -1,6 +1,9 @@
 from unittest import TestCase
 
 from classes.firebase_db_handler import get_company_records, add_company, retrieve_company_info, retrieve_company_by_id
+from classes.upload_page_handler import validate_upload_file_name, validate_file_content
+from classes.sn_api_handler import get_auth_token, create_sn_user
+from classes.settings_handler import get_settings
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation
 
 
@@ -34,3 +37,27 @@ class TestFireBaseDBHandler(TestCase):
         retrieved_company = retrieve_company_by_id(child_index)
         self.assertEqual(1, 1)
 
+    def test_file_validation(self):
+        return_value = validate_upload_file_name('scot.csv')
+        self.assertEqual('valid', return_value)
+
+    def test_file_content(self):
+        file_name = 'users.csv'
+        return_value = validate_file_content(file_name)
+        self.assertNotEqual(10, return_value)
+
+    def test_get_settings(self):
+        settings = get_settings()
+        self.assertEqual('default', settings['sn_tenant_to_use'])
+
+    def test_get_sn_auth_token(self):
+        settings = get_settings()
+        auth_token = get_auth_token(settings)
+        auth_token_size = len(auth_token)
+        self.assertEqual(86, auth_token_size)
+
+    def test_create_sn_user(self):
+        settings = get_settings()
+        auth_token = get_auth_token(settings)
+        have_success = create_sn_user(settings, auth_token, 'Doug', 'Lange', 'dlange@unittest.com', 'dlange')
+        self.assertEqual(0, have_success)

@@ -9,13 +9,13 @@ import os
 import msal
 
 # from sn_auth_helper import get_auth_token
-from sn_api_calls import get_single_user, get_auth_token, add_users
+# from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_company_info
-from classes.upload_page_handler import get_file_list
+from classes.upload_page_handler import get_file_list, validate_upload_file_name, validate_file_content
+from classes.sn_api_handler import get_single_user, get_auth_token, add_users
 
-# TODO:  Check this is to see how add an edit link https://www.youtube.com/watch?v=Us9DuF4KWUE
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
 app.secret_key = os.urandom(24)
@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'csv'}
 
+# TODO: Need to refactor all of this settings stuff to use the settings_handler.
 try:
     with open('settings.yaml', 'r') as settings_file:
         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
@@ -48,22 +49,22 @@ def index_page():
             all_companies = retrieve_company_info()
             have_cert_path = True
         return render_template('index.html', all_companies=all_companies, have_cert_path=have_cert_path)
-    else:
-        logger.info('Calling POST on index.html')
-        print('Calling POST on index.html')
-        selected = request.form.get('file')
-        if 'Process' in request.form['submit']:
-            print('Processing File')
-            csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
-            print('CSV File: ' + csv_file)
-            status_message = add_users(csv_file)
-        if 'Delete' in request.form['submit']:
-            if selected is not None:
-                file_name_to_delete = file_names[int(selected)]
-                print(file_name_to_delete)
-                file_to_delete = os.path.join(UPLOAD_FOLDER, file_name_to_delete)
-                os.remove(file_to_delete)
-        return render_template('index.html')
+    # else:
+    #     logger.info('Calling POST on index.html')
+    #     print('Calling POST on index.html')
+    #     selected = request.form.get('file')
+    #     if 'Process' in request.form['submit']:
+    #         print('Processing File')
+    #         csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
+    #         print('CSV File: ' + csv_file)
+    #         status_message = add_users(csv_file)
+    #     if 'Delete' in request.form['submit']:
+    #         if selected is not None:
+    #             file_name_to_delete = file_names[int(selected)]
+    #             print(file_name_to_delete)
+    #             file_to_delete = os.path.join(UPLOAD_FOLDER, file_name_to_delete)
+    #             os.remove(file_to_delete)
+    #     return render_template('index.html')
 
 
 @app.route('/uem', methods=['GET', 'POST'])
@@ -139,6 +140,7 @@ def upload_file():
     logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
     print('Files in upload: ' + str(total_files_in_uploads))
 
+    # Check to see if we have an actual file.
     if request.method == 'POST':
         if 'file' not in request.files:
             print('Got no file')
@@ -149,14 +151,19 @@ def upload_file():
             print('filename is blank')
             flash('No Selected File')
             return redirect(request.url)
-        if file.filename == 'users.csv':
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            print(os.path.join(UPLOAD_FOLDER, filename))
-            is_valid = True
-        else:
-            print('Bad filename')
 
+        file_name = file.filename
+        filename = secure_filename(file_name)
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+
+    return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
+
+
+@app.route('/uploadcsv/<string:file_name>')
+def process_user_file(file_name):
+    total_files_in_uploads, file_list = get_file_list()
+    if validate_file_content(file_name) == 0:
+        return_message = add_users(file_name)
     return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
 
 
@@ -221,10 +228,3 @@ def allowed_file(filename):
     print(filename)
     print(filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-# def load_cache():
-#    cache = msal.SerializableTokenCache()
-#    if session.get('token_cache'):
-#        cache.deserialize(session['token_cache'])
-#    return cache
