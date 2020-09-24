@@ -17,11 +17,11 @@
                 <th scope="col">File Name</th>
             </tr>
         </thead>
-        <tbody>
         {% for current_file in file_list %}
+        <tbody>
             <tr>
                 <td scope="row"><a href="/uploadcsv/{{ current_file }}">Process</a></td>
-                <td scope="row">Delete</td>
+                <td scope="row"><a href="/deletecsv/{{ current_file }}">Delete</a></td>
                 <td scope="row">{{ current_file }}</td>
             </tr>
         {% endfor %}

@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    {% if status == 'Success' %}
+        <h2 class="text-center text-success">Success</h2>
+    {% else %}
+        <h2 class="text-center text-danger">Failure</h2>
+    {% endif %}
+</div>
+{% endblock %}

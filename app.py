@@ -13,8 +13,8 @@ import msal
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_company_info
-from classes.upload_page_handler import get_file_list, validate_upload_file_name, validate_file_content
-from classes.sn_api_handler import get_single_user, get_auth_token, add_users
+from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
+from classes.sn_api_handler import get_single_user, get_auth_token
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -135,10 +135,11 @@ def about():
 
 @app.route('/uploadcsv', methods=['GET', 'POST'])
 def upload_file():
-    total_files_in_uploads, file_list = get_file_list()
-
-    logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
-    print('Files in upload: ' + str(total_files_in_uploads))
+    if request.method =='GET':
+        total_files_in_uploads, file_list = get_file_list()
+        logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
+        print('Files in upload: ' + str(total_files_in_uploads))
+        return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
 
     # Check to see if we have an actual file.
     if request.method == 'POST':
@@ -152,19 +153,37 @@ def upload_file():
             flash('No Selected File')
             return redirect(request.url)
 
-        file_name = file.filename
-        filename = secure_filename(file_name)
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        success_statement = 'Success'
+        try:
+            file_name = file.filename
+            filename = secure_filename(file_name)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+        except IOError:
+            success_statement = 'Failed to upload: ' + filename
 
-    return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
+    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
 
 
 @app.route('/uploadcsv/<string:file_name>')
 def process_user_file(file_name):
     total_files_in_uploads, file_list = get_file_list()
+    success_statement = 'Success'
     if validate_file_content(file_name) == 0:
-        return_message = add_users(file_name)
-    return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
+        add_service_now_users(file_name)
+
+    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
+
+
+@app.route('/deletecsv/<string:file_name>')
+def delete_user_file(file_name):
+    file_to_delete = get_file_path(file_name)
+    success_statement = "Success"
+    try:
+        os.remove(file_to_delete)
+    except IOError:
+        success_statement = 'Failed to Delete: ' + file_name
+
+    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
 
 
 # @app.route('/watsoninfo', methods=['GET', 'POST'])
