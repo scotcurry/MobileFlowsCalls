@@ -38,33 +38,18 @@ except IOError:
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index_page():
-    redirect_url = request.host + '/servicenow'
 
     if request.method == 'GET':
         logger.info('Calling GET on index.html')
         all_companies = []
         have_cert_path = False
         if path.exists('./euc-user-uploaddb-firebase-adminsdk.json'):
-            print('Path Exists')
+            print('App.py - index_page - Path Exists')
             all_companies = retrieve_company_info()
             have_cert_path = True
         return render_template('index.html', all_companies=all_companies, have_cert_path=have_cert_path)
-    # else:
-    #     logger.info('Calling POST on index.html')
-    #     print('Calling POST on index.html')
-    #     selected = request.form.get('file')
-    #     if 'Process' in request.form['submit']:
-    #         print('Processing File')
-    #         csv_file = os.path.join(UPLOAD_FOLDER, 'users.csv')
-    #         print('CSV File: ' + csv_file)
-    #         status_message = add_users(csv_file)
-    #     if 'Delete' in request.form['submit']:
-    #         if selected is not None:
-    #             file_name_to_delete = file_names[int(selected)]
-    #             print(file_name_to_delete)
-    #             file_to_delete = os.path.join(UPLOAD_FOLDER, file_name_to_delete)
-    #             os.remove(file_to_delete)
-    #     return render_template('index.html')
+    else:
+        return render_template('add_company.html')
 
 
 @app.route('/uem', methods=['GET', 'POST'])

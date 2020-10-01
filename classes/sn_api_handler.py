@@ -13,22 +13,6 @@ default_settings = SnServerInfo('url', 'client_id', 'client_secret', 'user_name'
 base_url = ''
 UPLOAD_FOLDER = 'uploads'
 
-# try:
-#     settings = get_settings()
-#     cw_settings.base_url = settings['cw_sn_server_url']
-#     cw_settings.client_id = settings['cw_sn_client_id']
-#     cw_settings.client_secret = settings['cw_sn_client_secret']
-#     cw_settings.user_name = settings['cw_sn_user_name']
-#     cw_settings.user_password = settings['cw_sn_user_password']
-#
-#     default_settings.base_url = settings['sn_server_url']
-#     default_settings.client_id = settings['sn_client_id']
-#     default_settings.client_secret = settings['sn_client_secret']
-#     default_settings.user_name = settings['sn_user_name']
-#     default_settings.user_password = settings['sn_user_password']
-# except IOError:
-#     logger.error('Got an IO Error reading Settings.yaml')
-
 
 def get_auth_token(settings):
     url = settings['sn_server_url']

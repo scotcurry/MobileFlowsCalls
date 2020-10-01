@@ -4,6 +4,7 @@ from classes.firebase_db_handler import get_company_records, add_company, retrie
 from classes.upload_page_handler import validate_upload_file_name, validate_file_content
 from classes.sn_api_handler import get_auth_token, create_sn_user
 from classes.settings_handler import get_settings
+from classes.sendgrid_email_handler import validate_api_key, build_email_message, send_email
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation
 
 
@@ -61,3 +62,13 @@ class TestFireBaseDBHandler(TestCase):
         auth_token = get_auth_token(settings)
         have_success = create_sn_user(settings, auth_token, 'Doug', 'Lange', 'dlange@unittest.com', 'dlange')
         self.assertEqual(0, have_success)
+
+    def test_send_email_api_key(self):
+        return_value = validate_api_key()
+        self.assertEqual('Success', return_value)
+
+    def test_build_email_message(self):
+        messages = build_email_message('Scot Curry', 'scotc@vmware.com', 'Scot Curryware', 'scurry@curryware.org',
+                                       'An email message', 'text/plain', 'Hello World')
+        return_value = send_email(messages)
+        self.assertEqual(200, return_value)

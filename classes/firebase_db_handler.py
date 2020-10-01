@@ -11,9 +11,11 @@ def get_auth_cert():
     database_url = 'https://euc-user-uploaddb.firebaseio.com'
     if os.path.exists('./euc-user-uploaddb-firebase-adminsdk.json'):
         cert_path = './euc-user-uploaddb-firebase-adminsdk.json'
-        if not firebase_admin._apps:
+        try:
+            firebase_admin.get_app()
+        except ValueError:
             firebase_credentials = credentials.Certificate(cert_path)
-            firebase_db_app: App = firebase_admin.initialize_app(firebase_credentials, {
+            firebase_admin.initialize_app(firebase_credentials, {
                 'databaseURL': database_url
             })
     return firebase_admin.get_app()

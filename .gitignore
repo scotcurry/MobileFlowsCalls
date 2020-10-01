@@ -86,3 +86,4 @@ fabric.properties
 *.pyc
 .DS_Store
 /euc-user-uploaddb-firebase-adminsdk.json
+/sendgrid_settings.yaml

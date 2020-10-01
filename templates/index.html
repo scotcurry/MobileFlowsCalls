@@ -9,7 +9,7 @@
                     <th scope="col">Company Name</th>
                     <th scope="col">Street Address</th>
                     <th scope="col">City</th>
-                    <th scope="col">State</th>
+                    <th scope="col">Zip Code</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,8 +27,7 @@
         <h2 class="text-center text-danger">No Cert File</h2>
     {% endif %}
 
-    <input type="submit" id="submit_button_process" name="submit" value="Process" class="btn btn-primary" />
-    <input type="submit" id="submit_button_delete" name="submit" value="Delete" class="btn btn-primary">
+    <input type="submit" id="submit_button_process" name="submit" value="Add Company" class="btn btn-primary" />
     <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
 </form>
 {% endblock %}
