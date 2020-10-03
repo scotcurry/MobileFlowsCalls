@@ -15,6 +15,8 @@ from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_company_info
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
+from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes
+from classes.settings_handler import get_settings
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -28,11 +30,11 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'csv'}
 
 # TODO: Need to refactor all of this settings stuff to use the settings_handler.
-try:
-    with open('settings.yaml', 'r') as settings_file:
-        settings = yaml.load(settings_file, Loader=yaml.FullLoader)
-except IOError:
-    print('Got an IO Error')
+# try:
+#     with open('settings.yaml', 'r') as settings_file:
+#         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
+# except IOError:
+#     print('Got an IO Error')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -52,8 +54,70 @@ def index_page():
         return render_template('add_company.html')
 
 
+@app.route('/uploadcsv', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'GET':
+        total_files_in_uploads, file_list = get_file_list()
+        logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
+        print('Files in upload: ' + str(total_files_in_uploads))
+        return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
+
+    # Check to see if we have an actual file.
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            print('Got no file')
+            flash('No File Part')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            print('filename is blank')
+            flash('No Selected File')
+            return redirect(request.url)
+
+        success_statement = 'Success'
+        try:
+            file_name = file.filename
+            filename = secure_filename(file_name)
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+        except IOError:
+            success_statement = 'Failed to upload: ' + filename
+
+    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
+
+
+@app.route('/uploadcsv/<string:file_name>')
+def uploaded_file_process(file_name):
+    success_statement = 'Success'
+    if validate_file_content(file_name) == 0:
+        add_service_now_users(file_name)
+
+    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
+
+
+@app.route('/zero_day', methods=['GET', 'POST'])
+def handle_zero_day():
+
+    if request.method == 'GET':
+        all_groups = get_all_groups()
+        return render_template('all_groups.html', all_groups=all_groups)
+    else:
+        return render_template("index.html")
+
+
+@app.route('/zero_day/<string:group_id>')
+def set_zero_day_configuration(group_id):
+
+    all_users = get_users_in_group(group_id)
+    for current_user in all_users:
+        user_id = get_all_user_attributes(current_user.user_id)
+        current_user.user_name = user_id
+
+    return render_template('zero_day_users.html', all_users=all_users)
+
+
 @app.route('/uem', methods=['GET', 'POST'])
 def uem_calls():
+    settings = get_settings('settings.yaml')
     if request.method == "GET":
         uem_oauth_url = settings['uem_oauth_endpoint']
         uem_client_id = settings['uem_oauth_client_id']
@@ -74,6 +138,7 @@ def uem_calls():
 @app.route('/servicenow', methods=['GET', 'POST'])
 def service_now():
     # Let's pass the values from a form
+    settings = get_settings('settings.yaml')
     if request.method == 'GET':
         sn_url = settings['cw_sn_server_url']
         sn_api_user = settings['cw_sn_user_name']
@@ -118,47 +183,6 @@ def about():
     return render_template('about.html', server=server, base_url=base_url)
 
 
-@app.route('/uploadcsv', methods=['GET', 'POST'])
-def upload_file():
-    if request.method =='GET':
-        total_files_in_uploads, file_list = get_file_list()
-        logger.info('Total files in UPLOADS ' + str(total_files_in_uploads))
-        print('Files in upload: ' + str(total_files_in_uploads))
-        return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
-
-    # Check to see if we have an actual file.
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            print('Got no file')
-            flash('No File Part')
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            print('filename is blank')
-            flash('No Selected File')
-            return redirect(request.url)
-
-        success_statement = 'Success'
-        try:
-            file_name = file.filename
-            filename = secure_filename(file_name)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-        except IOError:
-            success_statement = 'Failed to upload: ' + filename
-
-    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
-
-
-@app.route('/uploadcsv/<string:file_name>')
-def process_user_file(file_name):
-    total_files_in_uploads, file_list = get_file_list()
-    success_statement = 'Success'
-    if validate_file_content(file_name) == 0:
-        add_service_now_users(file_name)
-
-    return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
-
-
 @app.route('/deletecsv/<string:file_name>')
 def delete_user_file(file_name):
     file_to_delete = get_file_path(file_name)
@@ -169,30 +193,6 @@ def delete_user_file(file_name):
         success_statement = 'Failed to Delete: ' + file_name
 
     return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
-
-
-# @app.route('/watsoninfo', methods=['GET', 'POST'])
-# def call_watson():
-#     if request.method == 'GET':
-#         assistant_id = 'c5964ff2-fd30-4a23-ae3f-f9a65931d54e'
-#         ibm_url = 'https://api.us-south.assistant.watson.cloud.ibm.com'
-#         api_key = 'G14zvFinyuIIUAC3m-z5H3vM_Khjo8wZ6EktagnTEN4n'
-#         return render_template('watson.html', app_id=assistant_id, ibm_url=ibm_url, api_key=api_key)
-#     else:
-#         app_id = request.form['app_id'].strip()
-#         url = request.form['watson_url'].strip()
-#         api_key = request.form['api_key'].strip()
-#         authenticator = IAMAuthenticator(api_key)
-#         version = '2020-04-01'
-#         assistant = AssistantV2(version=version, authenticator=authenticator)
-#         assistant.set_service_url(url)
-#         print('URL: ' + url)
-#         print('Assistant ID: ' + app_id)
-#         print('API Key: ' + api_key)
-#         response = assistant.create_session(assistant_id=app_id).get_result()
-#         print(json.dumps(response, indent=2))
-#
-#         return render_template('watson.html', session_id=response['session_id'])
 
 
 @app.route('/azure', methods=['GET', 'POST'])
@@ -232,3 +232,26 @@ def allowed_file(filename):
     print(filename)
     print(filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# @app.route('/watsoninfo', methods=['GET', 'POST'])
+# def call_watson():
+#     if request.method == 'GET':
+#         assistant_id = 'c5964ff2-fd30-4a23-ae3f-f9a65931d54e'
+#         ibm_url = 'https://api.us-south.assistant.watson.cloud.ibm.com'
+#         api_key = 'G14zvFinyuIIUAC3m-z5H3vM_Khjo8wZ6EktagnTEN4n'
+#         return render_template('watson.html', app_id=assistant_id, ibm_url=ibm_url, api_key=api_key)
+#     else:
+#         app_id = request.form['app_id'].strip()
+#         url = request.form['watson_url'].strip()
+#         api_key = request.form['api_key'].strip()
+#         authenticator = IAMAuthenticator(api_key)
+#         version = '2020-04-01'
+#         assistant = AssistantV2(version=version, authenticator=authenticator)
+#         assistant.set_service_url(url)
+#         print('URL: ' + url)
+#         print('Assistant ID: ' + app_id)
+#         print('API Key: ' + api_key)
+#         response = assistant.create_session(assistant_id=app_id).get_result()
+#         print(json.dumps(response, indent=2))
+#
+#         return render_template('watson.html', session_id=response['session_id'])

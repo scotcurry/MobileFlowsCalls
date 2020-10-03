@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1 class="text-center">Zero Day Page</h1>
+    <table class="table">
+        <thead class="thread-dark">
+            <tr>
+                <th scope="col">Action</th>
+                <th scope="col">Group Name</th>
+                <th scope="col">Group ID</th>
+            </tr>
+        </thead>
+        {% for current_group in all_groups %}
+        <tbody>
+            <tr>
+                <td scope="row"><a href="/zero_day/{{ current_group.group_id }}">Make New Hire</a></td>
+                <td scope="row">{{ current_group.group_name }}</td>
+                <td scope="row">{{ current_group.group_id }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

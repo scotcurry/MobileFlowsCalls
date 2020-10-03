@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+ <table class="table">
+     <thead class="thread-dark">
+        <tr>
+            <th scope="col">Display Name</th>
+            <th scope="col">User Name</th>
+            <th scope="col">UserID</th>
+        </tr>
+     </thead>
+     <tbody>
+         {% for current_user in all_users %}
+         <tr>
+             <td scope="row">{{ current_user.display_name }}</td>
+             <td scope="row">{{ current_user.user_name }}</td>
+             <td scope="row">{{ current_user.user_id }}</td>
+         </tr>
+         {% endfor %}
+     </tbody>
+ </table>
+{% endblock %}

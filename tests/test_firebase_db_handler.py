@@ -5,6 +5,8 @@ from classes.upload_page_handler import validate_upload_file_name, validate_file
 from classes.sn_api_handler import get_auth_token, create_sn_user
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import validate_api_key, build_email_message, send_email
+from classes.access_api_handler import get_access_info, get_all_groups, get_group_id_by_name, set_new_hire_group, \
+    create_magic_link, get_users_in_group, get_all_user_attributes
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation
 
 
@@ -72,3 +74,38 @@ class TestFireBaseDBHandler(TestCase):
                                        'An email message', 'text/plain', 'Hello World')
         return_value = send_email(messages)
         self.assertEqual(200, return_value)
+
+    def test_get_ws1_access_token(self):
+        url, token = get_access_info()
+        print(token)
+        self.assertGreater(len(token), 40)
+
+    def test_get_access_groups(self):
+        all_groups = get_all_groups()
+        self.assertGreater(len(all_groups), 0)
+
+    def test_get_group_id_by_name(self):
+        group_name = 'NewHires@curryware.org'
+        group_id = get_group_id_by_name(group_name)
+        self.assertEqual('91077254-b603-4bc9-affe-179aca3fa6b6', group_id)
+
+    def test_set_new_hire_group(self):
+        group_id = '91077254-b603-4bc9-affe-179aca3fa6b6'
+        return_value = set_new_hire_group(group_id)
+        self.assertEqual('Success', return_value)
+
+    def test_create_magic_link(self):
+        user_name = 'jcraig'
+        domain = 'curryware.org'
+        return_value = create_magic_link(user_name, domain)
+        self.assertNotEqual('Error', return_value)
+
+    def test_get_users_in_group(self):
+        group_id = '91077254-b603-4bc9-affe-179aca3fa6b6'
+        all_users = get_users_in_group(group_id)
+        self.assertGreater(len(all_users), 0)
+
+    def test_get_username_by_userid(self):
+        user_id = '7f9144b9-abbf-46a7-8297-12bcd2288042'
+        user_name = get_all_user_attributes(user_id)
+        self.assertNotEqual('NlaAdZiCLo', user_name)
