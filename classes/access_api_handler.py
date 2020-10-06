@@ -90,7 +90,7 @@ def get_users_in_group(group_id):
         for member in all_members:
             user_id = member['value']
             display_name = member['display']
-            current_user = AccessUser(None, user_id, display_name)
+            current_user = AccessUser(None, user_id, display_name, None, None, None, None)
             users_in_group.append(current_user)
 
     return users_in_group
@@ -106,10 +106,19 @@ def get_all_user_attributes(user_id):
     if response.status_code == 200:
         response_json = response.json()
         user_name = response_json['userName']
-        user_domain = response_json['urn:scim:schemas:extension:workspace:1.0"']['domain']
-        return user_name
+        user_id = response_json['id']
+        first_name = response_json['name']['givenName']
+        last_name = response_json['name']['familyName']
+        display_name = first_name + ' ' + last_name
+        email_address = response_json['emails'][0]['value']
+        sam_account_name = response_json['urn:scim:schemas:extension:workspace:tenant:aw-curryware-ex1:1.0']['sAMAccountName']
+        user_domain = response_json['urn:scim:schemas:extension:workspace:1.0']['domain']
+        upn = response_json['urn:scim:schemas:extension:workspace:1.0']['userPrincipalName']
+        user_info = AccessUser(user_name, user_id, display_name, user_domain, email_address, sam_account_name, upn)
+        return user_info
     else:
-        return 'NlaAdZiCLo'
+        error_info = AccessUser('NlaAdZiCLo', None, None, None, None, None, None)
+        return error_info
 
 
 def set_new_hire_group(group_id):
@@ -138,15 +147,18 @@ def create_magic_link(username, domain):
     server_url, auth_token = get_access_info()
     body_dict = {'domain': domain, 'userName': username}
     post_body = json.dumps(body_dict)
+    print(post_body)
     endpoint = '/SAAS/jersey/manager/api/token/auth/state'
     url_endpoint = server_url + endpoint
     headers = {'Authorization': auth_token,
                'Content-Type': 'application/vnd.vmware.horizon.manager.tokenauth.generation.request+json',
-               'Accept': 'application/vnd.vmware.horizon.manager.tokenauth.email.response+json'}
+               'Accept': 'application/vnd.vmware.horizon.manager.tokenauth.link.response+json'}
     response = requests.post(url=url_endpoint, data=post_body, headers=headers)
     if response.status_code == 200:
         response_json = response.json()
         login_link = response_json['loginLink']
+    elif response.status_code == 409:
+        login_link = 'User Exists'
     else:
         login_link = 'Error'
 
@@ -158,5 +170,11 @@ def delete_magic_link_token(user_id):
     access_server, auth_token = get_access_info()
     endpoint = '/SAAS/jersey/manager/api/token/auth/state/'
     url_endpoint = access_server + endpoint + user_id
-    auth_header = 'HZN ' + auth_token
-    headers = {'Authorization': auth_header}
+    headers = {'Authorization': auth_token}
+    response = requests.delete(url=url_endpoint, headers=headers)
+    if response.status_code == 204:
+        return_value = 'Success'
+    else:
+        return_value = str(response.status_code)
+
+    return return_value

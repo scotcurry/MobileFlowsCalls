@@ -3,16 +3,22 @@
  <table class="table">
      <thead class="thread-dark">
         <tr>
+            <th scope="col">Send Email</th>
             <th scope="col">Display Name</th>
             <th scope="col">User Name</th>
-            <th scope="col">UserID</th>
+            <th scope="col">User Domain</th>
+            <th scope="col">Delete Token</th>
+            <th scope="col">User ID</th>
         </tr>
      </thead>
      <tbody>
          {% for current_user in all_users %}
          <tr>
+             <td scope="row"><a href="/send_email/{{ current_user.user_id }}">send_mail</a></td>
              <td scope="row">{{ current_user.display_name }}</td>
-             <td scope="row">{{ current_user.user_name }}</td>
+             <td scope="row">{{ current_user.email_address }}</td>
+             <td scope="row">{{ current_user.domain }}</td>
+             <td scope="row"><a class="text-danger" href="/delete_token/{{ current_user.user_id }}">delete token</a></td>
              <td scope="row">{{ current_user.user_id }}</td>
          </tr>
          {% endfor %}

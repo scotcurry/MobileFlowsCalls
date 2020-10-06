@@ -4,7 +4,6 @@ from datetime import datetime
 from os import path
 import logging
 import json
-import yaml
 import os
 import msal
 
@@ -15,8 +14,10 @@ from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_company_info
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
-from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes
+from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
+    delete_magic_link_token
 from classes.settings_handler import get_settings
+from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -108,11 +109,40 @@ def handle_zero_day():
 def set_zero_day_configuration(group_id):
 
     all_users = get_users_in_group(group_id)
+    user_display_info = []
     for current_user in all_users:
-        user_id = get_all_user_attributes(current_user.user_id)
-        current_user.user_name = user_id
+        user_info = get_all_user_attributes(current_user.user_id)
+        user_display_info.append(user_info)
 
-    return render_template('zero_day_users.html', all_users=all_users)
+    return render_template('zero_day_users.html', all_users=user_display_info)
+
+
+@app.route('/send_email/<string:user_id>')
+def send_zero_day_email(user_id):
+
+    user_info = get_all_user_attributes(user_id)
+    link_to_send = create_magic_link(user_info.user_name, user_info.domain)
+    return_value = 'Failure'
+    if link_to_send[0: 4] == 'http':
+        from_address = 'scurry@curryware.org'
+        from_name = 'Welcome Admin'
+        subject = 'Welcome Email'
+        content_type = 'text/html'
+        email_body = html_email_builder(link_to_send)
+        email_json = build_email_message(user_info.display_name, user_info.email_address, from_name, from_address,
+                                         subject, content_type, email_body)
+        return_value = send_email(email_json)
+        if return_value == '200' or return_value == '202':
+            return_value = 'Success'
+
+    return render_template('file_operation.html', status=return_value)
+
+
+@app.route('/delete_token/<string:user_id>')
+def delete_auth_token(user_id):
+
+    return_value = delete_magic_link_token(user_id)
+    return render_template('file_operation.html', status=return_value)
 
 
 @app.route('/uem', methods=['GET', 'POST'])
