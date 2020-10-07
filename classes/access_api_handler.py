@@ -76,6 +76,23 @@ def get_group_id_by_name(group_name):
     return group_id
 
 
+def check_if_new_hire_group(group_id):
+
+    server_url, auth_token = get_access_info()
+    headers = {'Authorization': auth_token}
+    url_endpoint = server_url + '/SAAS/jersey/manager/api/token/auth/configuration'
+    validate_body = {'enabled': False, 'userAttributeForEmail': 'emails', 'loginLinkValidityMillis':
+                     86400000, 'groupUuid': group_id}
+    body_json = json.dumps(validate_body)
+    response = requests.get(url_endpoint, headers=headers, data=body_json)
+    if response.status_code == 200:
+        response_json = response.json()
+        is_enabled = response_json['enabled']
+        return is_enabled
+    else:
+        return str(response.status_code)
+
+
 def get_users_in_group(group_id):
 
     server_url, auth_token = get_access_info()
@@ -90,7 +107,7 @@ def get_users_in_group(group_id):
         for member in all_members:
             user_id = member['value']
             display_name = member['display']
-            current_user = AccessUser(None, user_id, display_name, None, None, None, None)
+            current_user = AccessUser(None, user_id, display_name, None, None, None, None, None)
             users_in_group.append(current_user)
 
     return users_in_group
@@ -114,10 +131,12 @@ def get_all_user_attributes(user_id):
         sam_account_name = response_json['urn:scim:schemas:extension:workspace:tenant:aw-curryware-ex1:1.0']['sAMAccountName']
         user_domain = response_json['urn:scim:schemas:extension:workspace:1.0']['domain']
         upn = response_json['urn:scim:schemas:extension:workspace:1.0']['userPrincipalName']
-        user_info = AccessUser(user_name, user_id, display_name, user_domain, email_address, sam_account_name, upn)
+        zero_mail = response_json['urn:scim:schemas:extension:workspace:tenant:aw-curryware-ex1:1.0']['mailNickname']
+        user_info = AccessUser(user_name, user_id, display_name, user_domain, email_address, sam_account_name, upn,
+                               zero_mail)
         return user_info
     else:
-        error_info = AccessUser('NlaAdZiCLo', None, None, None, None, None, None)
+        error_info = AccessUser('NlaAdZiCLo', None, None, None, None, None, None, None)
         return error_info
 
 

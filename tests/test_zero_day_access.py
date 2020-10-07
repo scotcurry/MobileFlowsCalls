@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from classes.sendgrid_email_handler import validate_api_key, build_email_message, send_email
 from classes.access_api_handler import get_access_info, get_all_groups, get_group_id_by_name, set_new_hire_group, \
-    create_magic_link, get_users_in_group, get_all_user_attributes, delete_magic_link_token
+    create_magic_link, get_users_in_group, get_all_user_attributes, delete_magic_link_token, check_if_new_hire_group
 
 
 class TestAccessCalls(TestCase):
@@ -70,8 +70,9 @@ class TestAccessCalls(TestCase):
         # delete_magic_link_token(user_id)
         user_info = get_all_user_attributes(user_id)
         email_link = create_magic_link(user_info.user_name, user_info.domain)
-        email_json = build_email_message(user_info.display_name, user_info.email_address, from_name, from_address,
+        email_json = build_email_message(user_info.display_name, user_info.mail_nickname, from_name, from_address,
                                          subject, content_type, email_link)
+        print(email_json)
         status_code = send_email(email_json)
         self.assertEqual(status_code, '200')
 
@@ -79,3 +80,18 @@ class TestAccessCalls(TestCase):
         user_id = '550a92fd-b220-42ca-befe-85d8ba3391bb'
         return_value = delete_magic_link_token(user_id)
         self.assertEqual('Success', return_value)
+
+    def test_is_new_hire_enabled(self):
+        enabled_group_id = '91077254-b603-4bc9-affe-179aca3fa6b6'
+        not_enabled_group_id = 'b66a4a09-6d07-4aab-b187-93933dbc3c79'
+        return_value = check_if_new_hire_group(enabled_group_id)
+        print('True return - ' + str(return_value))
+        if return_value:
+            true_valid = True
+        return_value = check_if_new_hire_group(not_enabled_group_id)
+        print(return_value)
+        if not return_value:
+            false_valid = True
+        value_to_compare = true_valid and false_valid
+        print('False return - ' + str(return_value))
+        self.assertEqual(True, value_to_compare)

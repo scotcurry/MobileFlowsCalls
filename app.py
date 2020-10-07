@@ -129,7 +129,7 @@ def send_zero_day_email(user_id):
         subject = 'Welcome Email'
         content_type = 'text/html'
         email_body = html_email_builder(link_to_send)
-        email_json = build_email_message(user_info.display_name, user_info.email_address, from_name, from_address,
+        email_json = build_email_message(user_info.display_name, user_info.mail_nickname, from_name, from_address,
                                          subject, content_type, email_body)
         return_value = send_email(email_json)
         if return_value == '200' or return_value == '202':

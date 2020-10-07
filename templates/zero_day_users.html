@@ -5,7 +5,8 @@
         <tr>
             <th scope="col">Send Email</th>
             <th scope="col">Display Name</th>
-            <th scope="col">User Name</th>
+            <th scope="col">Corp. Mail</th>
+            <th scope='col'>Pers. Mail</th>
             <th scope="col">User Domain</th>
             <th scope="col">Delete Token</th>
             <th scope="col">User ID</th>
@@ -17,6 +18,7 @@
              <td scope="row"><a href="/send_email/{{ current_user.user_id }}">send_mail</a></td>
              <td scope="row">{{ current_user.display_name }}</td>
              <td scope="row">{{ current_user.email_address }}</td>
+             <td scope="row">{{ current_user.mail_nickname }}</td>
              <td scope="row">{{ current_user.domain }}</td>
              <td scope="row"><a class="text-danger" href="/delete_token/{{ current_user.user_id }}">delete token</a></td>
              <td scope="row">{{ current_user.user_id }}</td>
