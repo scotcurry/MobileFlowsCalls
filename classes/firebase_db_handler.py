@@ -1,23 +1,50 @@
-import os
 import json
 import firebase_admin
-from firebase_admin import credentials, App
-from firebase_admin import db
+from firebase_admin import credentials, db
 
+from google.oauth2 import service_account
+from google.auth.transport.requests import AuthorizedSession
+
+from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbUserInformation, FbCompanyInformation
+
+database_name = 'https://euc-user-uploaddb.firebaseio.com/'
+
+
+def get_auth_token():
+
+    scopes = [
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/firebase.database"
+    ]
+    path_exists, settings_file_path = path_to_settings_file('euc-user-uploaddb-firebase-adminsdk.json')
+    auth_credentials = service_account.Credentials.from_service_account_file(settings_file_path, scopes=scopes)
+    auth_session = AuthorizedSession(credentials=auth_credentials)
+    return auth_session
+
+
+def get_company_info_with_session():
+
+    auth_session = get_auth_token()
+    path_to_companies = database_name + 'companies.json'
+    response = auth_session.get(path_to_companies)
+    return response.json()
 
 
 def get_auth_cert():
     database_url = 'https://euc-user-uploaddb.firebaseio.com'
-    if os.path.exists('./euc-user-uploaddb-firebase-adminsdk.json'):
-        cert_path = './euc-user-uploaddb-firebase-adminsdk.json'
+    path_exists, settings_file_path = path_to_settings_file('euc-user-uploaddb-firebase-adminsdk.json')
+    if path_exists:
         try:
             firebase_admin.get_app()
         except ValueError:
-            firebase_credentials = credentials.Certificate(cert_path)
+            print('firebase_db_handler - get_auth_cert - Got ValueError exception')
+            firebase_credentials = credentials.Certificate(settings_file_path)
             firebase_admin.initialize_app(firebase_credentials, {
                 'databaseURL': database_url
             })
+    else:
+        print("Not credential file")
     return firebase_admin.get_app()
 
 
@@ -57,7 +84,7 @@ def retrieve_company_info():
                 employee_title = current_user['title']
                 employee_manager = current_user['manager_last_name']
                 company_employees.append(FbUserInformation(employee_first_name, employee_last_name, employee_department,
-                                                           employee_title, employee_manager))
+                                                           employee_title, employee_manager, None, None))
             company_name = current_company_json['company_name']
             street_address = current_company_json['street_address']
             city = current_company_json['company_city']

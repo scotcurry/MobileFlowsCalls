@@ -14,3 +14,13 @@ def get_settings(settings_file_name):
         print('Got an IO Error: ' + error.description)
 
     return settings
+
+
+def path_to_settings_file(settings_file_name):
+    class_file_path = os.path.dirname(os.path.abspath(__file__))
+    base_path = os.path.split(class_file_path)[0]
+    settings_file = os.path.join(base_path, settings_file_name)
+    path_exists = False
+    if os.path.exists:
+        path_exists = True
+    return path_exists, os.path.abspath(settings_file)

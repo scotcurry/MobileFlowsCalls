@@ -1,4 +1,5 @@
 from json import JSONEncoder
+from collections import namedtuple
 
 
 class FbCompanyInformation:
@@ -8,19 +9,25 @@ class FbCompanyInformation:
         self.street_address = street_address
         self.company_city = city
         self.company_state = state
-        self.users = users
+        self.users = []
 
 
 class FbUserInformation:
 
-    def __init__(self, first_name, last_name, department, title, manager_last_name: object):
+    def __init__(self, first_name, last_name, department, title, manager_last_name, corp_email, personal_email: object):
         self.first_name = first_name
         self.last_name = last_name
         self.department = department
         self.title = title
         self.manager_last_name = manager_last_name
+        self.corp_email = corp_email
+        self.personal_email = personal_email
 
 
 class FbCompanyInfoEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__
+
+
+def fb_company_decoder(fb_company_dict):
+    return namedtuple('fb_company_tuple', fb_company_dict.keys())(*fb_company_dict.values())
