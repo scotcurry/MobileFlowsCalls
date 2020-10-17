@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+<form action="" method="post">
+    <div style="background-color:#808080">
+    {% if action == "edit" %}
+        <h2 class="text-center text-primary">Edit {{company_info.company_name }}</h2>
+    {% else %}
+        <h2 class="text-center text-primary">Add Company</h2>
+    {% endif %}
+    <div class="form-group">
+        <label for="company_name">Company Name</label>
+        {% if action == "edit" %}
+          <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="company_name" value="{{company_info.company_name}}">
+        {% else %}
+          <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="company_name">
+        {% endif %}
+    </div>
+    <div class="form-group row">
+        <div class="col">
+          <label for="street_address">Street Address</label>
+          {% if action == "edit" %}
+            <input type="text" class="form-control col-xs-3" name="street_address" id="street_address" value="{{ company_info.street_address }}">
+          {% else %}
+            <input type="text" class="form-control col-xs-3" name="street_address" id="street_address">
+          {% endif %}
+        </div>
+        <div class="col">
+          <label for="city">City</label>
+          {% if action == "edit" %}
+            <input type="text" class="form-control col-xs-3" name="city" id="city" value="{{ company_info.company_city }}">
+          {% else %}
+            <input type="text" class="form-control col-xs-3" name="city" id="city">
+          {% endif %}
+        </div>
+        <div class="col">
+          <label for="city">State</label>
+          {% if action == "edit" %}
+            <input type="text" class="form-control col-xs-2" name="city" id="state" value="{{ company_info.company_state }}">
+          {% else %}
+            <input type="text" class="form-control col-xs-2" name="city" id="state">
+          {% endif %}
+        </div>
+    </div>
+    {% if action == "edit" %}
+      <button type="submit" name="action_button" id="validate" class="btn btn-primary" value="update_company">Update</button>
+    {% else %}
+      <button type="submit" name="action_button" id="validate" class="btn btn-primary" value="add_company">Add Company</button>
+    {% endif %}
+    </div>
+</form>
+{% endblock %}

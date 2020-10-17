@@ -54,7 +54,8 @@ def get_all_groups():
         for group in groups:
             group_id = group['id']
             group_name = group['displayName']
-            all_groups.append(AccessGroup(group_id, group_name))
+            group_type = group['urn:scim:schemas:extension:workspace:1.0']['internalGroupType']
+            all_groups.append(AccessGroup(group_id, group_name, group_type))
 
     return all_groups
 

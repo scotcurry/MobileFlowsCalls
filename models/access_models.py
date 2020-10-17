@@ -1,8 +1,9 @@
 class AccessGroup:
 
-    def __init__(self, group_id, group_name):
+    def __init__(self, group_id, group_name, group_type):
         self.group_id = group_id
         self.group_name = group_name
+        self.group_type = group_type
 
 
 class AccessUser:

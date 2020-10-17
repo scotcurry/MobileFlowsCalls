@@ -1,7 +1,6 @@
-from flask import Flask, request, redirect, render_template, flash, abort
+from flask import Flask, request, redirect, render_template, flash, abort, url_for
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from os import path
 import logging
 import json
 import os
@@ -11,7 +10,7 @@ import msal
 # from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
-from classes.firebase_db_handler import retrieve_company_info
+from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
 from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
@@ -30,29 +29,37 @@ logger = logging.getLogger(__name__)
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'csv'}
 
-# TODO: Need to refactor all of this settings stuff to use the settings_handler.
-# try:
-#     with open('settings.yaml', 'r') as settings_file:
-#         settings = yaml.load(settings_file, Loader=yaml.FullLoader)
-# except IOError:
-#     print('Got an IO Error')
-
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
 def index_page():
 
+    all_companies = retrieve_all_company_info()
     if request.method == 'GET':
         logger.info('Calling GET on index.html')
-        all_companies = []
-        have_cert_path = False
-        if path.exists('./euc-user-uploaddb-firebase-adminsdk.json'):
-            print('App.py - index_page - Path Exists')
-            all_companies = retrieve_company_info()
-            have_cert_path = True
-        return render_template('index.html', all_companies=all_companies, have_cert_path=have_cert_path)
+        return render_template('index.html', all_companies=all_companies)
     else:
-        return render_template('add_company.html')
+        button_value = request.form['action_button']
+        company_to_edit = None
+        if button_value[0: 4] == 'edit':
+            for current_company in all_companies:
+                if current_company.firebase_key == button_value[4: 24]:
+                    company_to_edit = current_company.firebase_key
+        return redirect(url_for('add_edit_company', company_to_edit=company_to_edit))
+
+
+@app.route('/add_edit_company', methods=['GET', 'POST'])
+def add_edit_company():
+
+    if request.method == 'GET':
+        firebase_key = request.args['company_to_edit']
+        company_info = retrieve_info_by_company_key(firebase_key)
+        return render_template('add_edit_company.html', company_info=company_info, action='edit')
+    if request.method == 'POST':
+        action_button_text = request.form['action_button']
+        if action_button_text == 'update_company':
+            scot = 'scot'
+        return render_template('add_edit_company.html')
 
 
 @app.route('/uploadcsv', methods=['GET', 'POST'])
@@ -175,7 +182,6 @@ def service_now():
         sn_api_user_password = settings['cw_sn_user_password']
         sn_client_id = settings['cw_sn_client_id']
         sn_client_secret = settings['cw_sn_client_secret']
-        print()
         return render_template('servicenow.html', sn_client_id=sn_client_id,
                                sn_client_secret=sn_client_secret, sn_api_user_password=sn_api_user_password,
                                sn_api_user=sn_api_user, sn_url=sn_url)

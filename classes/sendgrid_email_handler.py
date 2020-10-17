@@ -6,11 +6,9 @@ from models.sendgrid_email import SendGridContent, SendGridToUser, SendGridFromU
 
 
 def validate_api_key():
-    # settings = get_settings('sendgrid_settings.yaml')
-    # sendgrid_api_key = settings['sendgrid_api_key']
-    # bearer_token = 'Bearer ' + sendgrid_api_key
+
     bearer_token = get_authorization_header()
-    headers = {'Authorization': bearer_token, 'Content-Type': 'application/json'}
+    headers = {'Authorization': bearer_token, 'Content-Type': 'application/json', 'Accept': 'application/json'}
     endpoint = 'https://api.sendgrid.com/v3/api_keys'
     response = requests.get(url=endpoint, headers=headers)
     response_code = response.status_code
@@ -39,7 +37,9 @@ def build_email_message(to_name, to_email_address, from_name, from_email_address
 def send_email(messages_json):
     endpoint = 'https://api.sendgrid.com/v3//mail/send'
     api_key = get_authorization_header()
-    auth_header = {'Authorization': api_key, 'Content-Type': 'application/json'}
+    auth_header = {'Authorization': api_key, 'Content-Type': 'application/json', 'Accept': 'application/json'}
+    print(messages_json)
+    print(auth_header)
     response = requests.post(url=endpoint, data=messages_json, headers=auth_header)
     print('sendgrid_email - send_email - Status Code: ' + str(response.status_code))
     if response.status_code == 200 or response.status_code == 202:
