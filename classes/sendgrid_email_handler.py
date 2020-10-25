@@ -1,6 +1,6 @@
-import yaml
+import os
 import requests
-from classes.settings_handler import get_settings
+from classes.settings_handler import get_settings, path_to_static_folder
 from models.sendgrid_email import SendGridContent, SendGridToUser, SendGridFromUser, SendGridMessageBody, \
     SendGridEmailEncoder, SendGridPersonalization
 
@@ -56,8 +56,18 @@ def get_authorization_header():
     return bearer_token
 
 
-def html_email_builder(link_to_send):
+def html_email_builder(link_to_send, first_name, username):
 
     email_body = '<h2>New Hire Email</h2>'
     email_body = email_body + '<a href="' + link_to_send + '">Auth Token</a>'
-    return email_body
+    static_folder = path_to_static_folder()
+    email_template_file = os.path.join(static_folder + '/email_template.html')
+    print(first_name)
+    print(username)
+    with open(email_template_file, 'r') as email_template:
+        email_template_text = email_template.read()
+        print(email_template_text.find('{Access_URL}'))
+        email_template_text = email_template_text.replace('{Access_URL}', link_to_send)
+        email_template_text = email_template_text.replace('{Username}', username)
+        email_template_text = email_template_text.replace('{FirstName}', first_name)
+    return email_template_text

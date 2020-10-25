@@ -53,8 +53,9 @@ def retrieve_all_company_info():
         street_address = current_company['street_address']
         city = current_company['company_city']
         state = current_company['company_state']
+        normalized_name = current_company['normalized_name']
 
-        company_info.append(FbCompanyInformation(company_name, street_address, city, state, company_employees))
+        company_info.append(FbCompanyInformation(company_name, street_address, city, state, normalized_name, company_employees))
     return company_info
 
 
@@ -63,7 +64,7 @@ def retrieve_info_by_company_key(firebase_key):
 
     all_companies = retrieve_all_company_info()
     for current_company in all_companies:
-        if firebase_key == current_company.company_name:
+        if firebase_key == current_company.normalized_name:
             return current_company
 
     return None
@@ -82,7 +83,6 @@ def add_company(company_json, company_name):
     auth_session = get_auth_token()
     normalized_name = slugify(company_name)
     path_to_companies = database_name + 'companies/' + normalized_name + '.json'
-    print(path_to_companies)
     response = auth_session.put(path_to_companies, company_json)
     return response.status_code
 

@@ -12,9 +12,11 @@
         {% for current_group in all_groups %}
         <tbody>
             <tr>
-                <td scope="row"><a href="/zero_day/{{ current_group.group_id }}">Make New Hire</a></td>
-                <td scope="row">{{ current_group.group_name }}</td>
-                <td scope="row">{{ current_group.group_id }}</td>
+                {% if current_group.group_name == 'NewHires@curryware.org' %}
+                    <td scope="row"><a href="/zero_day/{{ current_group.group_id }}">Show Users</a></td>
+                    <td scope="row">{{ current_group.group_name }}</td>
+                    <td scope="row">{{ current_group.group_id }}</td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>

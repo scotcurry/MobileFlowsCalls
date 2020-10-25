@@ -24,3 +24,10 @@ def path_to_settings_file(settings_file_name):
     if os.path.exists:
         path_exists = True
     return path_exists, os.path.abspath(settings_file)
+
+
+def path_to_static_folder():
+    path_to_this_class = os.path.dirname(os.path.abspath(__file__))
+    base_path = os.path.split(path_to_this_class)[0]
+    static_folder = os.path.join(base_path + '/static')
+    return static_folder

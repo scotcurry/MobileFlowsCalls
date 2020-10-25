@@ -41,6 +41,19 @@
           {% endif %}
         </div>
     </div>
+
+        <div class="col">
+            {% for current_user in company_users %}
+                <label for="company_name">First Name</label>
+                {% if action == "edit" %}
+                  <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="first_name" value="{{current_user.first_name}}">
+                {% else %}
+                  <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="first_name">
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    </div>
     {% if action == "edit" %}
       <button type="submit" name="action_button" id="validate" class="btn btn-primary" value="update_company">Update</button>
     {% else %}

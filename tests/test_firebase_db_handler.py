@@ -1,12 +1,13 @@
 import json, uuid
 from unittest import TestCase
+from slugify import slugify
 
 from classes.firebase_db_handler import get_auth_token, retrieve_info_by_company_key, retrieve_all_company_info, \
     update_company_info, add_company
 from classes.upload_page_handler import validate_upload_file_name, validate_file_content
 from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation, \
-    fb_company_decoder, FbCompanyToActOn
+    fb_company_decoder
 
 
 class TestFireBaseDBHandler(TestCase):
@@ -29,8 +30,10 @@ class TestFireBaseDBHandler(TestCase):
         company_user = FbUserInformation('Jen', 'Slabaugh', 'Sales', 'Staff SE', 'Gaidsick', 'jslabaugh@curryware.org',
                                          'jslabaugh@vmware.com')
         all_users.append(company_user)
-        # company_info = FbCompanyInformation('Mills Co.', '1 Mills Lane', 'Big Horn', 'WY', all_users)
-        company_info = FbCompanyInformation('VMware', '1155 Perimeter Lane', 'Sandy Springs', 'GA', all_users)
+        company_name = 'VMware'
+        normalized_name = slugify(company_name)
+        # company_info = FbCompanyInformation(company_name, '1 Mills Lane', 'Big Horn', 'WY', normalized_name, all_users)
+        company_info = FbCompanyInformation(company_name, '1155 Perimeter Lane', 'Sandy Springs', 'GA', normalized_name, all_users)
         company_info_json = FbCompanyInfoEncoder().encode(company_info)
         print(company_info_json)
         return_value = add_company(company_info_json, company_info.company_name)
@@ -65,9 +68,9 @@ class TestFireBaseDBHandler(TestCase):
         self.assertGreater(len(all_companies), 0)
 
     def test_retrieve_company_by_id(self):
-        child_index = 'VMware'
+        child_index = 'Mills Co.'
         retrieved_company = retrieve_info_by_company_key(child_index)
-        self.assertEqual(retrieved_company.company_name, 'VMware')
+        self.assertEqual(retrieved_company.company_name, child_index)
 
     def test_add_user_to_company(self):
         company_id = '-MGJgRfcZE4T-3Ik5Pky'

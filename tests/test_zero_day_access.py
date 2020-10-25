@@ -3,6 +3,7 @@ from unittest import TestCase
 from classes.sendgrid_email_handler import validate_api_key, build_email_message, send_email
 from classes.access_api_handler import get_access_info, get_all_groups, get_group_id_by_name, set_new_hire_group, \
     create_magic_link, get_users_in_group, get_all_user_attributes, delete_magic_link_token, check_if_new_hire_group
+from classes.settings_handler import path_to_static_folder
 
 
 class TestAccessCalls(TestCase):
@@ -95,3 +96,8 @@ class TestAccessCalls(TestCase):
         value_to_compare = true_valid and false_valid
         print('False return - ' + str(return_value))
         self.assertEqual(True, value_to_compare)
+
+    def test_get_static_folder(self):
+        folder_path = path_to_static_folder()
+        print(folder_path)
+        self.assertGreater(len(folder_path), 15)

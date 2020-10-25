@@ -2,20 +2,14 @@ from json import JSONEncoder
 from collections import namedtuple
 
 
-class FbCompanyToActOn:
-
-    def __init__(self, company_nane, company_info):
-        self.company_name = company_nane
-        self.company_info = company_info
-
-
 class FbCompanyInformation:
 
-    def __init__(self, company_name, street_address, city, state, users):
+    def __init__(self, company_name, street_address, city, state, normalized_name, users):
         self.company_name = company_name
         self.street_address = street_address
         self.company_city = city
         self.company_state = state
+        self.normalized_name = normalized_name
         self.users = users
 
 

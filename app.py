@@ -42,9 +42,12 @@ def index_page():
         button_value = request.form['action_button']
         company_to_edit = None
         if button_value[0: 4] == 'edit':
+            value_length = len(button_value)
+            company_name = button_value[4: value_length]
+            print(company_name)
             for current_company in all_companies:
-                if current_company.firebase_key == button_value[4: 24]:
-                    company_to_edit = current_company.firebase_key
+                if current_company.normalized_name == company_name:
+                    company_to_edit = current_company.normalized_name
         return redirect(url_for('add_edit_company', company_to_edit=company_to_edit))
 
 
@@ -53,10 +56,14 @@ def add_edit_company():
 
     if request.method == 'GET':
         firebase_key = request.args['company_to_edit']
+        print(firebase_key)
         company_info = retrieve_info_by_company_key(firebase_key)
-        return render_template('add_edit_company.html', company_info=company_info, action='edit')
+        company_users = company_info.users
+        return render_template('add_edit_company.html', company_info=company_info, company_users=company_users,
+                               action='edit')
     if request.method == 'POST':
         action_button_text = request.form['action_button']
+        print(action_button_text)
         if action_button_text == 'update_company':
             scot = 'scot'
         return render_template('add_edit_company.html')
@@ -135,7 +142,7 @@ def send_zero_day_email(user_id):
         from_name = 'Welcome Admin'
         subject = 'Welcome Email'
         content_type = 'text/html'
-        email_body = html_email_builder(link_to_send)
+        email_body = html_email_builder(link_to_send, user_info.user_name, user_info.display_name)
         email_json = build_email_message(user_info.display_name, user_info.mail_nickname, from_name, from_address,
                                          subject, content_type, email_body)
         return_value = send_email(email_json)
