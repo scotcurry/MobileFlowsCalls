@@ -10,13 +10,15 @@ import msal
 # from sn_api_calls import get_single_user, get_auth_token, add_users
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
-from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key
+from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key,\
+    retrieve_all_notifications
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
 from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
     delete_magic_link_token
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
+from classes.notification_handler import build_notifications
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -150,6 +152,14 @@ def send_zero_day_email(user_id):
             return_value = 'Success'
 
     return render_template('file_operation.html', status=return_value)
+
+
+@app.route('/notifications')
+def notification_page():
+
+    firebase_notifications = retrieve_all_notifications()
+    notifications = build_notifications(firebase_notifications)
+    return render_template('notifications.html', all_notifications=notifications)
 
 
 @app.route('/delete_token/<string:user_id>')

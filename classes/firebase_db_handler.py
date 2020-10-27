@@ -87,6 +87,16 @@ def add_company(company_json, company_name):
     return response.status_code
 
 
+def retrieve_all_notifications():
+
+    auth_session = get_auth_token()
+    path_to_notifications = database_name + 'notifications.json'
+    result = auth_session.get(path_to_notifications)
+    notifications_json = result.json()
+    print(notifications_json)
+    return notifications_json
+
+
 # def get_auth_cert():
 #     database_url = 'https://euc-user-uploaddb.firebaseio.com'
 #     path_exists, settings_file_path = path_to_settings_file('euc-user-uploaddb-firebase-adminsdk.json')
