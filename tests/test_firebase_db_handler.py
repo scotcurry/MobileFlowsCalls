@@ -3,7 +3,7 @@ from unittest import TestCase
 from slugify import slugify
 
 from classes.firebase_db_handler import get_auth_token, retrieve_info_by_company_key, retrieve_all_company_info, \
-    update_company_info, add_company
+    update_company_info, add_company, get_notification_by_id
 from classes.upload_page_handler import validate_upload_file_name, validate_file_content
 from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation, \
@@ -80,6 +80,11 @@ class TestFireBaseDBHandler(TestCase):
                                      'scotcurry4@gmail.com')
         company_info.users.append(new_user)
         self.assertEqual(0, 1)
+
+    def test_get_notification_by_id(self):
+        notification_id = 'c0067e80-1efc-496a-b6bd-d83b4aca8c15'
+        return_value = get_notification_by_id(notification_id)
+        self.assertEqual('Welcome to your first day!', return_value.header.title)
 
     def test_file_validation(self):
         return_value = validate_upload_file_name('scot.csv')

@@ -6,6 +6,8 @@ from google.auth.transport.requests import AuthorizedSession
 
 from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbUserInformation, FbCompanyInformation
+from models.notification_model import NotificationTitle, NotificationBody, NotificationImage, NotificationAction, \
+    NotificationPayload
 
 database_name = 'https://euc-user-uploaddb.firebaseio.com/'
 
@@ -93,8 +95,36 @@ def retrieve_all_notifications():
     path_to_notifications = database_name + 'notifications.json'
     result = auth_session.get(path_to_notifications)
     notifications_json = result.json()
-    print(notifications_json)
     return notifications_json
+
+
+def get_notification_by_id(notification_id):
+
+    all_notifications = retrieve_all_notifications()
+    for key, value in all_notifications.items():
+        json_to_parse = value
+        if json_to_parse['id'] == notification_id:
+            title = NotificationTitle(json_to_parse['header']['title'])
+            body = NotificationBody(json_to_parse['body']['description'])
+            image = NotificationImage(json_to_parse['image']['href'])
+            action_nodes = json_to_parse['actions']
+            all_actions = []
+            for current_action in action_nodes:
+                action_key = json_to_parse['actions'][current_action]['action_key']
+                allow_repeated = json_to_parse['actions'][current_action]['allow_repeated']
+                completed_label = json_to_parse['actions'][current_action]['completed_label']
+                action_id = json_to_parse['actions'][current_action]['id']
+                action_label = json_to_parse['actions'][current_action]['label']
+                primary = json_to_parse['actions'][current_action]['primary']
+                action_type = json_to_parse['actions'][current_action]['type']
+                url = json_to_parse['actions'][current_action]['url']['href']
+                build_notification = NotificationAction(action_id, action_label, action_type, primary, allow_repeated,
+                                                        url, action_key)
+                all_actions.append(build_notification)
+
+            notification_to_return = NotificationPayload(title, body, image, all_actions, None)
+
+    return notification_to_return
 
 
 # def get_auth_cert():

@@ -9,10 +9,14 @@
                 <th scope="col">Group ID</th>
             </tr>
         </thead>
-        {% for current_notification in all_groups %}
+        {% for current_group in all_groups %}
         <tbody>
             <tr>
-                <td scope="row"><a href="/zero_day/{{ current_group.group_id }}">Show Users</a></td>
+                {% if current_group.group_name == 'NewHires@curryware.org' %}
+                    <td scope="row"><a href="/zero_day/{{ current_group.group_id }}">Show Users</a></td>
+                {% else %}
+                    <td scope="row">N/A</td>
+                {% endif %}
                 <td scope="row">{{ current_group.group_name }}</td>
                 <td scope="row">{{ current_group.group_id }}</td>
             </tr>

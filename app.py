@@ -11,14 +11,14 @@ import msal
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key,\
-    retrieve_all_notifications
+    retrieve_all_notifications, get_notification_by_id
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
 from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
     delete_magic_link_token
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
-from classes.notification_handler import build_notifications
+from classes.notification_handler import build_notification_objects
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -46,7 +46,6 @@ def index_page():
         if button_value[0: 4] == 'edit':
             value_length = len(button_value)
             company_name = button_value[4: value_length]
-            print(company_name)
             for current_company in all_companies:
                 if current_company.normalized_name == company_name:
                     company_to_edit = current_company.normalized_name
@@ -154,19 +153,36 @@ def send_zero_day_email(user_id):
     return render_template('file_operation.html', status=return_value)
 
 
-@app.route('/notifications')
-def notification_page():
-
-    firebase_notifications = retrieve_all_notifications()
-    notifications = build_notifications(firebase_notifications)
-    return render_template('notifications.html', all_notifications=notifications)
-
-
 @app.route('/delete_token/<string:user_id>')
 def delete_auth_token(user_id):
 
     return_value = delete_magic_link_token(user_id)
     return render_template('file_operation.html', status=return_value)
+
+
+@app.route('/notifications', methods=['GET', 'POST'])
+def notification_page():
+
+    firebase_notifications = retrieve_all_notifications()
+    notifications = build_notification_objects(firebase_notifications)
+    return render_template('notifications.html', all_notifications=notifications)
+
+
+@app.route('/send_notification/<string:notification_id>', methods=['GET', 'POST'])
+def send_notification(notification_id):
+
+    notification = get_notification_by_id(notification_id)
+    if request.method == 'GET':
+        # TODO:  This has to be cleaned up at some point.
+        group_id = '75d1e88e-2ad5-4bd0-aa72-51820511466e'
+        all_users = get_users_in_group(group_id)
+        return render_template('send_notification.html', notification=notification, all_users=all_users)
+    else:
+        send_ids = request.form.getlist('user_id')
+        for current_id in send_ids:
+            print(current_id)
+
+        return render_template('/file_operation.html', success='Success')
 
 
 @app.route('/uem', methods=['GET', 'POST'])

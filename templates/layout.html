@@ -19,34 +19,38 @@
     <div class="row">
        <div class="col col-xl-1">
          <ul class="list-group col-1">
-           <a href="/" class="py-4" title="Company Information">
+           <a href="/" class="pt-4" title="Company Information">
              <svg width="50px" height="50px" viewBox="0 0 16 16" class="bi bi-people-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                <path fill-rule="evenodd" d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216zM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
              </svg>
            </a>
+           <p><small>Info</small></p>
          </ul>
          <ul class="list-group col-1">
-           <a href="/zero_day" class="py-4" title="Zero Day">
+           <a href="/zero_day" class="pt-4" title="Zero Day">
              <svg width="50px" height="50px" viewBox="0 0 16 16" class="bi bi-person-circle" fill="red" xmlns="http://www.w3.org/2000/svg">
                <path d="M13.468 12.37C12.758 11.226 11.195 10 8 10s-4.757 1.225-5.468 2.37A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63z"/>
                <path fill-rule="evenodd" d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
              </svg>
            </a>
+           <p><small>New</small></p>
          </ul>
          <ul class="list-group col-1">
-           <a href="/uploadcsv" class="py-4" title="File Upload">
+           <a href="/uploadcsv" class="pt-4" title="File Upload">
              <svg width="50px" height="50px" viewBox="0 0 16 16" class="bi bi-cloud-upload-fill" fill="green" xmlns="http://www.w3.org/2000/svg">
                <path fill-rule="evenodd" d="M8 0a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 4.095 0 5.555 0 7.318 0 9.366 1.708 11 3.781 11H7.5V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11h4.188C14.502 11 16 9.57 16 7.773c0-1.636-1.242-2.969-2.834-3.194C12.923 1.999 10.69 0 8 0zm-.5 14.5V11h1v3.5a.5.5 0 0 1-1 0z"/>
              </svg>
            </a>
+           <p><small>Upload</small></p>
          </ul>
          <ul class="list-group col-1">
-           <a href="/notifications" class="py-4" title="Notifications">
+           <a href="/notifications" class="pt-4" title="Notifications">
              <svg width="50px" height="50px" viewBox="0 0 16 16" class="bi bi-envelope" fill="indigo" xmlns="http://www.w3.org/2000/svg">
                <path fill-rule="evenodd" d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383l-4.758 2.855L15 11.114v-5.73zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.44A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.73z"/>
              </svg>
            </a>
+           <p><small>Not...</small></p>
          </ul>
        </div>
        <div class="col-lg-1 col-xl-11">
@@ -55,7 +59,17 @@
        </div>
     </div>
       <footer>
-        <p>This is the footer</p>
+        <div class="row">
+          <div class="col-xl-3">
+            <a class="nav-link text-right" href="/azure">Azure Functions</a>
+          </div>
+          <div class="col-xl-2">
+            <a class="nav-link text-center" href="/servicenow">Service Now APIs</a>
+          </div>
+          <div class="col-xl-2">
+            <a class="nav-link text-center" href="/uem">UEM APIs</a>
+          </div>
+        </div>
       </footer>
   </div>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -67,15 +81,6 @@
 <!--
       <ul class="list-group col-2">
 
-        <li class="list-group-item border border-success">
-          <a class="nav-link active" href="/">Home</a>
-        </li>
-        <li class="list-group-item">
-          <a class="nav-link" href="/uploadcsv">Upload Customer CSV</a>
-        </li>
-        <li class="list-group-item">
-          <a class="nav-link" href="/zero_day">Zero Day Operations</a>
-        </li>
         <li class="list-group-item">
           <a class="nav-link" href="/servicenow">Service Now APIs</a>
         </li>

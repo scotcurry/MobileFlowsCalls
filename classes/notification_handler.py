@@ -4,6 +4,7 @@ import requests
 
 from models.notification_model import NotificationTitle, NotificationAction, NotificationBody, NotificationEncoder, \
     NotificationImage, NotificationPayload
+from models.notification_to_send import NotificationToSend
 
 
 def convert_dict_to_card(notifications):
@@ -14,7 +15,7 @@ def convert_dict_to_card(notifications):
     return all_notifications
 
 
-def build_notifications(notifications):
+def build_notification_objects(notifications):
 
     notification_dict = convert_dict_to_card(notifications)
     all_notifications = []
@@ -23,7 +24,7 @@ def build_notifications(notifications):
         title = NotificationTitle(current_notification['header']['title'])
         body = NotificationBody(current_notification['body']['description'])
         image = NotificationImage(current_notification['image']['href'])
-        id = current_notification['id']
+        notification_id = current_notification['id']
 
         all_actions = []
         for key, value in current_notification['actions'].items():
@@ -39,7 +40,7 @@ def build_notifications(notifications):
                                              action_allow_repeated, action_url, action_key)
             all_actions.append(action_info)
 
-        notification_payload = NotificationPayload(title, body, image, all_actions, id)
+        notification_payload = NotificationPayload(title, body, image, all_actions, notification_id)
         all_notifications.append(notification_payload)
 
     return all_notifications
