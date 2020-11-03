@@ -8,6 +8,6 @@ class NotificationToSend:
         self.user_ids = user_ids
 
 
-class NotificationEncoder(JSONEncoder):
+class NotificationToSendEncoder(JSONEncoder):
     def default(self, o):
         return o.__dict__

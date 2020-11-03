@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, abort, url_for
+from flask import Flask, request, redirect, render_template, flash, abort, url_for, send_file
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import logging
@@ -11,14 +11,14 @@ import msal
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key,\
-    retrieve_all_notifications, get_notification_by_id
+    retrieve_all_notifications, get_notification_by_id, build_notification_objects
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
 from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
     delete_magic_link_token
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
-from classes.notification_handler import build_notification_objects
+from classes.notification_handler import get_notification_to_send_json, send_user_notification
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -179,10 +179,20 @@ def send_notification(notification_id):
         return render_template('send_notification.html', notification=notification, all_users=all_users)
     else:
         send_ids = request.form.getlist('user_id')
-        for current_id in send_ids:
-            print(current_id)
+        notification_no_users = get_notification_by_id(notification_id)
+        notification_to_send = get_notification_to_send_json(notification_no_users, send_ids)
+        return_value = send_user_notification(notification_to_send)
+        if return_value == 200:
+            return render_template('file_operation.html', status='Success')
+        else:
+            return render_template('file_operation.html', status=str(return_value))
 
-        return render_template('/file_operation.html', success='Success')
+
+@app.route('/notification_images/<string:image_name>')
+def get_image(image_name):
+
+    path = 'notification_images/' + image_name
+    return send_file(path, mimetype='image/png')
 
 
 @app.route('/uem', methods=['GET', 'POST'])

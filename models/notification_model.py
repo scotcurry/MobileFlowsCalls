@@ -19,7 +19,7 @@ class NotificationImage:
 
 class NotificationAction:
 
-    def __init__(self, action_id, label, action_type, primary, allow_repeated, image_url, action_key):
+    def __init__(self, action_id, label, action_type, primary, allow_repeated, image_url, action_key, completed_label):
         self.id = action_id
         self.label = label
         self.type = action_type
@@ -27,6 +27,7 @@ class NotificationAction:
         self.allow_repeated = allow_repeated
         self.url = image_url
         self.action_key = action_key
+        self.completed_label = completed_label
 
 
 class NotificationTitle:
