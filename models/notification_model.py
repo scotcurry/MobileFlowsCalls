@@ -3,12 +3,13 @@ from json import JSONEncoder
 
 class NotificationPayload:
 
-    def __init__(self, header, body, image_url, actions, id):
+    def __init__(self, header, body, image_url, actions, notification_id, notification_name):
         self.header = header
         self.body = body
         self.image = image_url
         self.actions = actions
-        self.id = id
+        self.id = notification_id
+        self.name = notification_name
 
 
 class NotificationImage:

@@ -18,7 +18,8 @@ from classes.access_api_handler import get_all_groups, get_users_in_group, get_a
     delete_magic_link_token
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
-from classes.notification_handler import get_notification_to_send_json, send_user_notification
+from classes.notification_handler import get_notification_to_send_json, send_user_notification, \
+    build_notification_from_form
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
@@ -186,6 +187,21 @@ def send_notification(notification_id):
             return render_template('file_operation.html', status='Success')
         else:
             return render_template('file_operation.html', status=str(return_value))
+
+
+@app.route('/notification_detail/<string:notification_id>', methods=['GET', 'POST'])
+def display_notification_detail(notification_id):
+
+    notification = get_notification_by_id(notification_id)
+    if request.method == 'GET':
+        action_count = len(notification.actions)
+        print('app - display_notification_detail -' + str(action_count))
+        return render_template('notification_detail.html', notification=notification, action_count=action_count)
+    else:
+        form_data = request.form
+        return_value = build_notification_from_form(form_data, notification)
+        print(return_value)
+        return render_template('file_operation.html', status='Success')
 
 
 @app.route('/notification_images/<string:image_name>')

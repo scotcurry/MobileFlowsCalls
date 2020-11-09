@@ -2,14 +2,14 @@
 {% block content %}
 <form action="" method="post">
     <div class="row form-group">
-        <label class="col-xl-1" for="notification_title">Title</label>
-        <input class="col-xl-9" type="text" class="form-control" name="notification_title" id="notification_title"
-               placeholder="{{ notification.header.title }}" value="{{ notification.header.title }}">
+        <label class="col-xl-1 pt-4" for="notification_title">Title</label>
+        <input type="text" class="form-control col-xl-9 mt-3" name="notification_title" id="notification_title"
+               placeholder="{{ notification.header.title }}" value="{{ notification.header.title }}" disabled="true">
     </div>
     <div class="form-group">
         <label for="notification_description">ServiceNow Client ID</label>
         <input type="text" class="form-control" id="notification_description" placeholder="{{ notification.body.description }}"
-               name="notification_description" value="{{ notification.body.description }}">
+               name="notification_description" value="{{ notification.body.description }}" disabled="true">
     </div>
     <table class="table">
         <thead class="thread-dark">

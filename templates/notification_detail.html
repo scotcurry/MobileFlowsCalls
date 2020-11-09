@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+<form action="" method="post">
+    <div class="container">
+        <!--  This section is used for every notification.  Not all notifications will have actions -->
+        <div class="border">
+            <div class="form-group">
+                <label for="notification_title">Notification Title</label>
+                <input type="text" class="form-control" name="notification_title" id="notification_title"
+                       placeholder="{{ notification.header.title }}" value="{{ notification.header.title }}">
+            </div>
+            <div class="form-group">
+                <label class="px-4" for="notification_description">Notification Description</label>
+                <input type="text" class="form-control px-4" name="notification_description" id="notification_description"
+                       placeholder="{{ notification.body.description }}" value="{{ notification.body.description }}">
+            </div>
+            <div class="form-group">
+                <label for="notification_image">Notification Image</label>
+                <input type="text" class="form-control" name="notification_image" id="notification_image"
+                       placeholder="{{ notification.image.href }}" value="{{ notification.image.href }}">
+            </div>
+        </div>
+        <ul class="nav nav-pills pt-4" id="actions_tab">
+            <li class="nav-item">
+                <a class="nav-link active" id="action_1_tab_link" data-toggle="tab" href="#action_tab_1" role="tab"
+                   aria-controls="action_1" aria-selected="true">Action 1</a>
+            </li>
+             <li class="nav-item">
+                <a class="nav-link" id="action_2_tab_link" data-toggle="tab" href="#action_tab_2" role="tab"
+                   aria-controls="action_2" aria-selected="false">Action 2</a>
+            </li>
+        </ul>
+        <div class="tab-content clearfix" id="tab-content-id">
+            <div class="tab-pane active" id="action_tab_1">
+                <div class="container">
+                    <div class="row">
+                        <p class="col-xl-2">Action Key</p>
+                        <input type="text" class="form-control col-xl-3" name="action_1_action_key" id="action_1_action_key"
+                            placeholder="Action Key" value="Action Key">
+                    </div>
+                    <div class="row">
+                        <p class="col-xl-2">Allow Repeated</p>
+                        <input type="text" class="form-control col-xl-3" name="action_1_allow_repeated"
+                            id="action_1_allow_repeated" placeholder="Action Key" value="Action Key">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="action_tab_2">
+                Action 2 Information
+            </div>
+        </div>
+        <button type="submit" id="validate" class="btn btn-primary btn-sm pt-4">Update Notification</button>
+    </div>
+</form>
+{% endblock %}

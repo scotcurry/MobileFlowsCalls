@@ -12,7 +12,11 @@
         {% for current_notification in all_notifications %}
         <tbody>
             <tr class="row">
-                <td class="col-xl-3">{{ current_notification.header.title }}</td>
+                <td class="col-xl-3">
+                    <a href="/notification_detail/{{ current_notification.id }}">
+                        {{ current_notification.header.title }}
+                    </a>
+                </td>
                 <td class="col-xl-7">{{ current_notification.body.description }}</td>
                 <td class="col-xl-1">
                     <a href="/send_notification/{{ current_notification.id }}">
