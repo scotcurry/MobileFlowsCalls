@@ -1,36 +1,40 @@
-{% extends "layout.html" %}
-{% block content %}
-<form action="" method="post">
-        <table class="table">
-            <thead class="thread-dark">
-                <tr>
-                    <th scope="col">Company Name</th>
-                    <th scope="col">Street Address</th>
-                    <th scope="col">City</th>
-                    <th scope="col">Zip Code</th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">Delete</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for current_company in all_companies %}
-                <tr>
-                    <td scope="row">{{ current_company.company_name }}</td>
-                    <td scope="row">{{ current_company.street_address }}</td>
-                    <td scope="row">{{ current_company.company_city }}</td>
-                    <td scope="row">{{ current_company.company_state }}</td>
-                    <td class="text-center">
-                        <button name="action_button" id="edit_button" class="btn btn-info btn-xs" value="edit{{current_company.normalized_name}}">Edit</button>
-                    </td>
-                    <td class="text-center">
-                        <button name="action_button" class="btn btn-danger btn-xs" value="delete{{current_company.normalized_name}}">Delete</button>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+<!DOCTYPE html>
+<html lang="en">
 
-    <input type="submit" id="submit_button_process" name="submit" value="Add Company" class="btn btn-primary" />
-    <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
-</form>
-{% endblock %}
+<head>
+    <title>VMware EBC Toolkit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+</head>
+
+<body>
+<div class="container" id="table-of-contents">
+    <div class="row" style="height: 100px; ">
+      <div class="col-12 col-xl-12">
+        <img src="{{ url_for('static', filename='header_image.png') }}" alt="header_mage">
+      </div>
+    </div>
+    <div class="container">
+        <div class="row justify-content-xl-center">
+            <h2>Select Tenant</h2>
+        </div>
+        <form action="" method="post">
+            <div class="row justify-content-xl-center">
+                <h3>Environment</h3>
+            </div>
+            <div class="row justify-content-xl-center">
+                <select name="environment" id="environment">
+                    {% for current_tenant in all_tenants %}
+                    <option value="{{ current_tenant.tenant_id}}">{{ current_tenant.tenant_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <br/>
+            <div class="row justify-content-xl-center">
+                <button type="submit" id="select_tenant" class="btn btn-primary">Select Tenant</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

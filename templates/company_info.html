@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+<form action="" method="post">
+        <table class="table">
+            <thead class="thread-dark">
+                <tr>
+                    <th scope="col">Company Name</th>
+                    <th scope="col">Street Address</th>
+                    <th scope="col">City</th>
+                    <th scope="col">Zip Code</th>
+                    <th scope="col">Edit</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for current_company in all_companies %}
+                <tr>
+                    <td scope="row">{{ current_company.company_name }}</td>
+                    <td scope="row">{{ current_company.street_address }}</td>
+                    <td scope="row">{{ current_company.company_city }}</td>
+                    <td scope="row">{{ current_company.company_state }}</td>
+                    <td class="text-center">
+                        <button name="action_button" id="edit_button" class="btn btn-info btn-xs" value="edit{{current_company.normalized_name}}">Edit</button>
+                    </td>
+                    <td class="text-center">
+                        <button name="action_button" class="btn btn-danger btn-xs" value="delete{{current_company.normalized_name}}">Delete</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    <input type="submit" id="submit_button_process" name="submit" value="Add Company" class="btn btn-primary" />
+    <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
+</form>
+{% endblock %}

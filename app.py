@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, abort, url_for, send_file
+from flask import Flask, request, redirect, render_template, flash, abort, url_for, send_file, session
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import logging
@@ -11,11 +11,12 @@ import msal
 from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key,\
-    retrieve_all_notifications, get_notification_by_id, build_notification_objects
+    retrieve_all_notifications, get_notification_by_id, build_notification_objects, get_tenant_info, \
+    get_tenant_new_hire_group
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
-from classes.access_api_handler import get_all_groups, get_users_in_group, get_all_user_attributes, create_magic_link, \
-    delete_magic_link_token
+from classes.access_api_handler import get_users_in_group, get_all_user_attributes, create_magic_link, \
+    delete_magic_link_token, get_group_id_by_name, get_access_info_from_firebase
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
 from classes.notification_handler import get_notification_to_send_json, send_user_notification, \
@@ -35,12 +36,28 @@ ALLOWED_EXTENSIONS = {'csv'}
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/index', methods=['GET', 'POST'])
+# TODO:  Need to update this once I have the tenant select screen working.
 def index_page():
 
-    all_companies = retrieve_all_company_info()
+    all_tenants = get_tenant_info()
     if request.method == 'GET':
-        logger.info('Calling GET on index.html')
-        return render_template('index.html', all_companies=all_companies)
+        return render_template('index.html', all_tenants=all_tenants)
+    else:
+        # Environment is the tenant_id field in the Firebase database.
+        environment = request.form.get('environment')
+        session['tenant_id'] = environment
+        return redirect(url_for('company_info_page', tenant_id=environment))
+
+
+@app.route('/company_info', methods=['GET', 'POST'])
+def company_info_page():
+
+    all_companies = retrieve_all_company_info()
+    tenant_id = session['tenant_id']
+    print('company_info_page - tenant_id ' + tenant_id)
+    if request.method == 'GET':
+        logger.info('Calling GET on company_info.html')
+        return render_template('company_info.html', all_companies=all_companies)
     else:
         button_value = request.form['action_button']
         company_to_edit = None
@@ -114,20 +131,22 @@ def uploaded_file_process(file_name):
 @app.route('/zero_day', methods=['GET', 'POST'])
 def handle_zero_day():
 
+    tenant_id = session['tenant_id']
     if request.method == 'GET':
-        all_groups = get_all_groups()
+        all_groups = get_access_info_from_firebase(tenant_id)
         return render_template('all_groups.html', all_groups=all_groups)
     else:
-        return render_template("index.html")
+        return render_template("company_info.html")
 
 
 @app.route('/zero_day/<string:group_id>')
 def set_zero_day_configuration(group_id):
 
-    all_users = get_users_in_group(group_id)
+    tenant_id = session['tenant_id']
+    all_users = get_users_in_group(tenant_id, group_id)
     user_display_info = []
     for current_user in all_users:
-        user_info = get_all_user_attributes(current_user.user_id)
+        user_info = get_all_user_attributes(tenant_id, current_user.user_id)
         user_display_info.append(user_info)
 
     return render_template('zero_day_users.html', all_users=user_display_info)
@@ -136,8 +155,9 @@ def set_zero_day_configuration(group_id):
 @app.route('/send_email/<string:user_id>')
 def send_zero_day_email(user_id):
 
-    user_info = get_all_user_attributes(user_id)
-    link_to_send = create_magic_link(user_info.user_name, user_info.domain)
+    tenant_id = session['tenant_id']
+    user_info = get_all_user_attributes(tenant_id, user_id)
+    link_to_send = create_magic_link(tenant_id, user_info.user_name, user_info.domain)
     return_value = 'Failure'
     if link_to_send[0: 4] == 'http':
         from_address = 'scurry@curryware.org'
@@ -157,13 +177,15 @@ def send_zero_day_email(user_id):
 @app.route('/delete_token/<string:user_id>')
 def delete_auth_token(user_id):
 
-    return_value = delete_magic_link_token(user_id)
+    tenant_id = session['tenant_id']
+    return_value = delete_magic_link_token(tenant_id, user_id)
     return render_template('file_operation.html', status=return_value)
 
 
 @app.route('/notifications', methods=['GET', 'POST'])
 def notification_page():
 
+    tenant_id = session['tenant_id']
     firebase_notifications = retrieve_all_notifications()
     notifications = build_notification_objects(firebase_notifications)
     return render_template('notifications.html', all_notifications=notifications)
@@ -173,10 +195,11 @@ def notification_page():
 def send_notification(notification_id):
 
     notification = get_notification_by_id(notification_id)
+    tenant_id = session['tenant_id']
+    group_name = get_tenant_new_hire_group(tenant_id)
+    new_user_group_id = get_group_id_by_name(tenant_id, group_name)
     if request.method == 'GET':
-        # TODO:  This has to be cleaned up at some point.
-        group_id = '75d1e88e-2ad5-4bd0-aa72-51820511466e'
-        all_users = get_users_in_group(group_id)
+        all_users = get_users_in_group(tenant_id, new_user_group_id)
         return render_template('send_notification.html', notification=notification, all_users=all_users)
     else:
         send_ids = request.form.getlist('user_id')
@@ -246,11 +269,7 @@ def service_now():
                                sn_api_user=sn_api_user, sn_url=sn_url)
     else:
         url = request.form['sn_url'].strip()
-        client_id = request.form['sn_client_id'].strip()
-        client_secret = request.form['sn_client_secret'].strip()
-        user_name = request.form['sn_api_user_name'].strip()
-        user_password = request.form['sn_api_user_password'].strip()
-        auth_token = get_auth_token(url, client_id, client_secret, user_name, user_password)
+        auth_token = get_auth_token(settings)
         user_json = get_single_user(url, auth_token, 'scurry')
         print(user_json)
         user_name = user_json['result'][0]['name']

@@ -8,6 +8,7 @@ from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbUserInformation, FbCompanyInformation
 from models.notification_model import NotificationTitle, NotificationBody, NotificationImage, NotificationAction, \
     NotificationPayload
+from models.tenant_info import TenantInfo
 
 database_name = 'https://euc-user-uploaddb.firebaseio.com/'
 
@@ -148,9 +149,49 @@ def update_firebase_notification_record(notification_number, update_json):
     response = auth_session.put(notification_number, update_json)
     return response.status_code
 
-# def convert_dict_to_card(notifications):
-#
-#     all_notifications = []
-#     for key, value in notifications.items():
-#         all_notifications.append(json.dumps(value))
-#     return all_notifications
+
+def get_tenant_info():
+
+    auth_session = get_auth_token()
+    tenant_node = database_name + 'tenant_info' + '.json'
+    tenants = auth_session.get(tenant_node)
+
+    all_tenants = []
+    if tenants.status_code == 200:
+        tenant_json = tenants.json()
+        for key, value in tenant_json.items():
+            tenant_name = tenant_json[key]['tenant_name']
+            tenant_id = tenant_json[key]['tenant_id']
+            access_url = tenant_json[key]['access_url']
+            client_id = tenant_json[key]['access_client_id']
+            client_token = tenant_json[key]['access_token']
+            new_hire_group_name = tenant_json[key]['new_hire_group']
+
+            tenant_to_add = TenantInfo(tenant_id, tenant_name, access_url, client_id, client_token, new_hire_group_name)
+            all_tenants.append(tenant_to_add)
+    else:
+        return None
+
+    return all_tenants
+
+
+def get_tenant_info_by_id(tenant_id):
+
+    all_tenants = get_tenant_info()
+    tenant_to_return = None
+    for current_tenant in all_tenants:
+        if current_tenant.tenant_id == tenant_id:
+            tenant_to_return = current_tenant
+
+    return tenant_to_return
+
+
+def get_tenant_new_hire_group(tenant_id):
+
+    all_tenants = get_tenant_info()
+    group_to_return = None
+    for current_tenant in all_tenants:
+        if current_tenant.tenant_id == tenant_id:
+            group_to_return = current_tenant.new_hire_group_name
+
+    return group_to_return

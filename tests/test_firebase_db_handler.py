@@ -3,7 +3,8 @@ from unittest import TestCase
 from slugify import slugify
 
 from classes.firebase_db_handler import get_auth_token, retrieve_info_by_company_key, retrieve_all_company_info, \
-    update_company_info, add_company, get_notification_by_id
+    update_company_info, add_company, get_notification_by_id, get_tenant_info, get_tenant_info_by_id, \
+    get_tenant_new_hire_group
 from classes.upload_page_handler import validate_upload_file_name, validate_file_content
 from classes.settings_handler import path_to_settings_file
 from models.fb_company_information import FbCompanyInformation, FbCompanyInfoEncoder, FbUserInformation, \
@@ -95,3 +96,16 @@ class TestFireBaseDBHandler(TestCase):
         return_value = validate_file_content(file_name)
         self.assertNotEqual(10, return_value)
 
+    def test_get_tenant_info(self):
+        all_tenants = get_tenant_info()
+        self.assertGreater(len(all_tenants), 0)
+
+    def test_get_tenant_by_id(self):
+        tenant_id = 'b09245b3-60ec-43cf-8a2a-61425b107ac5'
+        return_tenant = get_tenant_info_by_id(tenant_id)
+        self.assertEqual(tenant_id, return_tenant.tenant_id)
+
+    def test_get_new_user_group_from_tenant_id(self):
+        tenant_id = 'b09245b3-60ec-43cf-8a2a-61425b107ac5'
+        new_user_group_name = get_tenant_new_hire_group('b09245b3-60ec-43cf-8a2a-61425b107ac5')
+        self.assertEqual('NewHires@curryware.org', new_user_group_name)

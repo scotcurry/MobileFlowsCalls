@@ -26,6 +26,10 @@ def path_to_settings_file(settings_file_name):
     return path_exists, os.path.abspath(settings_file)
 
 
+#def get_firebase_tenants():
+
+
+
 def path_to_static_folder():
     path_to_this_class = os.path.dirname(os.path.abspath(__file__))
     base_path = os.path.split(path_to_this_class)[0]
