@@ -60,14 +60,10 @@ def company_info_page():
         return render_template('company_info.html', all_companies=all_companies)
     else:
         button_value = request.form['action_button']
-        company_to_edit = None
         if button_value[0: 4] == 'edit':
-            value_length = len(button_value)
-            company_name = button_value[4: value_length]
-            for current_company in all_companies:
-                if current_company.normalized_name == company_name:
-                    company_to_edit = current_company.normalized_name
-        return redirect(url_for('add_edit_company', company_to_edit=company_to_edit))
+            company_to_edit = button_value[4:]
+            print('Company to edit: ' + company_to_edit)
+            return redirect(url_for('add_edit_company', company_to_edit=company_to_edit))
 
 
 @app.route('/add_edit_company', methods=['GET', 'POST'])
@@ -75,16 +71,15 @@ def add_edit_company():
 
     if request.method == 'GET':
         firebase_key = request.args['company_to_edit']
-        print(firebase_key)
+        print('add_edit_firebase_key ' + firebase_key)
         company_info = retrieve_info_by_company_key(firebase_key)
         company_users = company_info.users
         return render_template('add_edit_company.html', company_info=company_info, company_users=company_users,
                                action='edit')
     if request.method == 'POST':
         action_button_text = request.form['action_button']
-        print(action_button_text)
         if action_button_text == 'update_company':
-            scot = 'scot'
+            scot = action_button_text
         return render_template('add_edit_company.html')
 
 
@@ -97,6 +92,7 @@ def upload_file():
         return render_template('upload.html', number_of_files=total_files_in_uploads, file_list=file_list)
 
     # Check to see if we have an actual file.
+    success_statement = 'Success'
     if request.method == 'POST':
         if 'file' not in request.files:
             print('Got no file')
@@ -108,7 +104,7 @@ def upload_file():
             flash('No Selected File')
             return redirect(request.url)
 
-        success_statement = 'Success'
+        filename = None
         try:
             file_name = file.filename
             filename = secure_filename(file_name)
@@ -185,7 +181,6 @@ def delete_auth_token(user_id):
 @app.route('/notifications', methods=['GET', 'POST'])
 def notification_page():
 
-    tenant_id = session['tenant_id']
     firebase_notifications = retrieve_all_notifications()
     notifications = build_notification_objects(firebase_notifications)
     return render_template('notifications.html', all_notifications=notifications)

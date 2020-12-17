@@ -23,14 +23,14 @@
                         <button name="action_button" id="edit_button" class="btn btn-info btn-xs" value="edit{{current_company.normalized_name}}">Edit</button>
                     </td>
                     <td class="text-center">
-                        <button name="action_button" class="btn btn-danger btn-xs" value="delete{{current_company.normalized_name}}">Delete</button>
+                        <button name="action_button" id="delete_button" class="btn btn-danger btn-xs" value="delete{{current_company.normalized_name}}">Delete</button>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
 
-    <input type="submit" id="submit_button_process" name="submit" value="Add Company" class="btn btn-primary" />
+    <button name="action_button" id="action_button" value="add_company" class="btn btn-primary">Add Company</button>
     <p class="text-center">Status Message:&nbsp; {{ status_message }}</p>
 </form>
 {% endblock %}

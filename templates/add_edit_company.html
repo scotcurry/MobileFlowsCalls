@@ -1,64 +1,28 @@
 {% extends "layout.html" %}
 {% block content %}
 <form action="" method="post">
-    <div style="background-color:#808080">
-    {% if action == "edit" %}
-        <h2 class="text-center text-primary">Edit {{company_info.company_name }}</h2>
-    {% else %}
+    <div style="background-color:#808080" class="m-2">
         <h2 class="text-center text-primary">Add Company</h2>
-    {% endif %}
-    <div class="form-group">
-        <label for="company_name">Company Name</label>
-        {% if action == "edit" %}
-          <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="company_name" value="{{company_info.company_name}}">
-        {% else %}
-          <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="company_name">
-        {% endif %}
-    </div>
-    <div class="form-group row">
-        <div class="col">
-          <label for="street_address">Street Address</label>
-          {% if action == "edit" %}
-            <input type="text" class="form-control col-xs-3" name="street_address" id="street_address" value="{{ company_info.street_address }}">
-          {% else %}
-            <input type="text" class="form-control col-xs-3" name="street_address" id="street_address">
-          {% endif %}
+        <div class="form-group" class="m-2">
+            <label for="company_name" class="m-2">Company Name</label>
+            <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="company_name" value="{{ company_info.company_name }}" />
         </div>
-        <div class="col">
-          <label for="city">City</label>
-          {% if action == "edit" %}
-            <input type="text" class="form-control col-xs-3" name="city" id="city" value="{{ company_info.company_city }}">
-          {% else %}
-            <input type="text" class="form-control col-xs-3" name="city" id="city">
-          {% endif %}
-        </div>
-        <div class="col">
-          <label for="city">State</label>
-          {% if action == "edit" %}
-            <input type="text" class="form-control col-xs-2" name="city" id="state" value="{{ company_info.company_state }}">
-          {% else %}
-            <input type="text" class="form-control col-xs-2" name="city" id="state">
-          {% endif %}
+        <div class="form-group row">
+            <div class="col">
+              <label for="street_address" class="m-2">Street Address</label>
+              <input type="text" class="form-control col-xs-3 m-2" name="street_address" id="street_address" value="{{ company_info.street_address }}" />
+            </div>
+            <div class="col">
+              <label for="city">City</label>
+              <input type="text" class="form-control col-xs-3 m-2" name="city" id="city" value="{{ company_info.company_city }}" />
+            </div>
+            <div class="col">
+              <label for="city">State</label>
+              <input type="text" class="form-control col-xs-2 m-2" name="city" id="state" value="{{ company_info.company_state }}">
+            </div>
         </div>
     </div>
 
-        <div class="col">
-            {% for current_user in company_users %}
-                <label for="company_name">First Name</label>
-                {% if action == "edit" %}
-                  <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="first_name" value="{{current_user.first_name}}">
-                {% else %}
-                  <input type="text" class="form-control w-25 col-xs-3" name="company_name" id="first_name">
-                {% endif %}
-            {% endfor %}
-        </div>
-
-    </div>
-    {% if action == "edit" %}
-      <button type="submit" name="action_button" id="validate" class="btn btn-primary" value="update_company">Update</button>
-    {% else %}
-      <button type="submit" name="action_button" id="validate" class="btn btn-primary" value="add_company">Add Company</button>
-    {% endif %}
-    </div>
+    <button type="submit" name="action_button" id="update_company" class="btn btn-primary" value="update_company">Update</button>
 </form>
 {% endblock %}

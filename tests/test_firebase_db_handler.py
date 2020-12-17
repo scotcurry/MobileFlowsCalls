@@ -69,9 +69,9 @@ class TestFireBaseDBHandler(TestCase):
         self.assertGreater(len(all_companies), 0)
 
     def test_retrieve_company_by_id(self):
-        child_index = 'Mills Co.'
+        child_index = 'mills-co'
         retrieved_company = retrieve_info_by_company_key(child_index)
-        self.assertEqual(retrieved_company.company_name, child_index)
+        self.assertEqual(retrieved_company.normalized_name, child_index)
 
     def test_add_user_to_company(self):
         company_id = '-MGJgRfcZE4T-3Ik5Pky'
