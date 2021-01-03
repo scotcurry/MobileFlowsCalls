@@ -4,11 +4,10 @@ from datetime import datetime
 import logging
 import json
 import os
-import msal
 
 # from sn_auth_helper import get_auth_token
 # from sn_api_calls import get_single_user, get_auth_token, add_users
-from azure_api_calls import azure_get_token, azure_get_user_info
+# from azure_api_calls import azure_get_token, azure_get_user_info
 from uem_rest_api import get_uem_oauth_token, get_uem_users
 from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info_by_company_key,\
     retrieve_all_notifications, get_notification_by_id, build_notification_objects, get_tenant_info, \
@@ -21,10 +20,13 @@ from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
 from classes.notification_handler import get_notification_to_send_json, send_user_notification, \
     build_notification_from_form
+from ddtrace import tracer
 
 app = Flask(__name__)
 # This is a requirement if you are every going to use POSTs and forms.
 app.secret_key = os.urandom(24)
+
+tracer.configure(hostname='datadog-agent', port='8126')
 
 logFormatter = '%(asctime)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=logFormatter, level=logging.ERROR)
@@ -41,6 +43,7 @@ def index_page():
 
     all_tenants = get_tenant_info()
     if request.method == 'GET':
+        logger.info('Calling Index Page')
         return render_template('index.html', all_tenants=all_tenants)
     else:
         # Environment is the tenant_id field in the Firebase database.
@@ -304,14 +307,14 @@ def delete_user_file(file_name):
     return render_template('file_operation.html', status=success_statement, calling_page='deletecsv')
 
 
-@app.route('/azure', methods=['GET', 'POST'])
-def azure_functions():
-    msal_version = msal.__version__
-    token = azure_get_token()
-    print(token)
-    token_to_print = token[0:10] + '...'
-    all_users = azure_get_user_info(token)
-    return render_template('azure.html', msal_version=msal_version, access_token=token_to_print, all_users=all_users)
+# @app.route('/azure', methods=['GET', 'POST'])
+# def azure_functions():
+#     msal_version = msal.__version__
+#     token = azure_get_token()
+#     print(token)
+#     token_to_print = token[0:10] + '...'
+#     all_users = azure_get_user_info(token)
+#     return render_template('azure.html', msal_version=msal_version, access_token=token_to_print, all_users=all_users)
 
 
 @app.route('/getipaddress', methods=['POST'])

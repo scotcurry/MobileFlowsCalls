@@ -2,7 +2,6 @@ from urllib.parse import urljoin
 import requests
 import logging
 import yaml
-import json
 
 from models.uem_rest_info import UEMServerInfo
 from models.uem_user import UEM_User
