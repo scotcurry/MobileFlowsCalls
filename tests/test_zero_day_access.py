@@ -45,7 +45,7 @@ class TestAccessCalls(TestCase):
 
     def test_create_magic_link(self):
         curryware_tenant_id = 'b09245b3-60ec-43cf-8a2a-61425b107ac5'
-        user_name = 'jcraig'
+        user_name = 'scurry'
         domain = 'curryware.org'
         return_value = create_magic_link(curryware_tenant_id, user_name, domain)
         self.assertNotEqual('Error', return_value)
@@ -78,10 +78,10 @@ class TestAccessCalls(TestCase):
         subject = 'Welcome Email'
         content_type = 'text/plain'
         user_id = '550a92fd-b220-42ca-befe-85d8ba3391bb'
-        # delete_magic_link_token(user_id)
+        delete_magic_link_token(curryware_tenant_id, user_id)
         user_info = get_all_user_attributes(curryware_tenant_id, user_id)
         email_link = create_magic_link(curryware_tenant_id, user_info.user_name, user_info.domain)
-        email_json = build_email_message(user_info.display_name, user_info.mail_nickname, from_name, from_address,
+        email_json = build_email_message(user_info.display_name, user_info.email_address, from_name, from_address,
                                          subject, content_type, email_link)
         print(email_json)
         status_code = send_email(email_json)

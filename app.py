@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, flash, abort, url_for, send_file, session
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 from datetime import datetime
 import logging
 import json
@@ -15,7 +16,7 @@ from classes.firebase_db_handler import retrieve_all_company_info, retrieve_info
 from classes.upload_page_handler import get_file_list, validate_file_content, add_service_now_users, get_file_path
 from classes.sn_api_handler import get_single_user, get_auth_token
 from classes.access_api_handler import get_users_in_group, get_all_user_attributes, create_magic_link, \
-    delete_magic_link_token, get_group_id_by_name, get_access_info_from_firebase
+    delete_magic_link_token, get_group_id_by_name, get_all_groups
 from classes.settings_handler import get_settings
 from classes.sendgrid_email_handler import build_email_message, send_email, html_email_builder
 from classes.notification_handler import get_notification_to_send_json, send_user_notification, \
@@ -72,18 +73,22 @@ def company_info_page():
 @app.route('/add_edit_company', methods=['GET', 'POST'])
 def add_edit_company():
 
+    firebase_key = request.args['company_to_edit']
+    print('add_edit_firebase_key ' + firebase_key)
+    company_info = retrieve_info_by_company_key(firebase_key)
+    company_users = company_info.users
     if request.method == 'GET':
-        firebase_key = request.args['company_to_edit']
-        print('add_edit_firebase_key ' + firebase_key)
-        company_info = retrieve_info_by_company_key(firebase_key)
-        company_users = company_info.users
         return render_template('add_edit_company.html', company_info=company_info, company_users=company_users,
                                action='edit')
     if request.method == 'POST':
         action_button_text = request.form['action_button']
         if action_button_text == 'update_company':
-            scot = action_button_text
-        return render_template('add_edit_company.html')
+            company_name = request.form['company_name']
+            street_address = request.form['street_address']
+            city = request.form['city']
+            print(street_address)
+        return render_template('add_edit_company.html', company_info=company_info, company_users=company_users,
+                               action='edit')
 
 
 @app.route('/uploadcsv', methods=['GET', 'POST'])
@@ -132,7 +137,7 @@ def handle_zero_day():
 
     tenant_id = session['tenant_id']
     if request.method == 'GET':
-        all_groups = get_access_info_from_firebase(tenant_id)
+        all_groups = get_all_groups(tenant_id)
         return render_template('all_groups.html', all_groups=all_groups)
     else:
         return render_template("company_info.html")
@@ -164,7 +169,7 @@ def send_zero_day_email(user_id):
         subject = 'Welcome Email'
         content_type = 'text/html'
         email_body = html_email_builder(link_to_send, user_info.user_name, user_info.display_name)
-        email_json = build_email_message(user_info.display_name, user_info.mail_nickname, from_name, from_address,
+        email_json = build_email_message(user_info.display_name, user_info.email_address, from_name, from_address,
                                          subject, content_type, email_body)
         return_value = send_email(email_json)
         if return_value == '200' or return_value == '202':
@@ -344,6 +349,17 @@ def allowed_file(filename):
     print(filename)
     print(filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS)
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.errorhandler(HTTPException)
+def handle_bad_request(exception):
+    response = exception.get_response()
+    response.data = json.dumps({
+        'code': exception.code,
+        'name': exception.name,
+        'description': exception.description
+    })
+    logger.error(response.data)
 
 # @app.route('/watsoninfo', methods=['GET', 'POST'])
 # def call_watson():
